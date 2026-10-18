@@ -12,20 +12,9 @@ theme:
   name: material
   language: pt-BR
   palette:
-    # Modo Claro
     - scheme: default
       primary: indigo
       accent: indigo
-      toggle:
-        icon: material/brightness-7
-        name: Alternar para modo escuro
-    # Modo Escuro
-    - scheme: slate
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-4
-        name: Alternar para modo claro
   features:
     - navigation.instant
     - navigation.tracking
@@ -43,6 +32,8 @@ theme:
 markdown_extensions:
   - admonition
   - pymdownx.details
+  - pymdownx.arithmatex:
+      generic: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -64,6 +55,13 @@ markdown_extensions:
   - toc:
       permalink: true
 
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
 plugins:
   - search
   - minify:
@@ -71,4 +69,7 @@ plugins:
 
 nav:
   - Início: index.md
+  - "Visão do Produto": visao-produto.md
+  - Requisitos: requisitos.md
+  - "Histórias de Usuários": historias-usuario.md
   - Arquitetura: ARCHITECTURE.md
