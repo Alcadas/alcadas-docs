@@ -1,6 +1,6 @@
 # Guia de Contribuição - Alçadas
 
-Obrigado por contribuir com o UnBook! Para manter a organização do código e o padrão profissional, siga as instruções abaixo.
+Obrigado por contribuir com o projeto **Alçadas**! Para manter a organização e o padrão profissional da documentação e especificações técnicas, siga as instruções abaixo.
 
 ## Padrão de Branches
 
