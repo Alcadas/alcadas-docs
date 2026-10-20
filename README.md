@@ -25,8 +25,8 @@ Este repositório centraliza toda a documentação técnica, artefatos de arquit
 
 1. **Clone o repositório:**
    ```bash
-   git clone https://github.com/Alcadas/docs.git
-   cd docs
+   git clone https://github.com/Alcadas/alcadas-docs.git
+   cd alcadas-docs
    ```
 
 2. **Crie e ative o ambiente virtual:**

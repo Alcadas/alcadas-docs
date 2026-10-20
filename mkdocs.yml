@@ -72,4 +72,21 @@ nav:
   - "Visão do Produto": visao-produto.md
   - Requisitos: requisitos.md
   - "Histórias de Usuários": historias-usuario.md
-  - Arquitetura: ARCHITECTURE.md
+  - Arquitetura:
+      - "Visão Geral": ARCHITECTURE.md
+      - "Tabela de Transições": arquitetura/tabela-transicoes.md
+      - "Decisões de Arquitetura (ADRs)":
+          - "Catálogo de ADRs": arquitetura/adrs/index.md
+          - "ADR-001: Monorepo com Nx": arquitetura/adrs/ADR-001-monorepo-nx.md
+          - "ADR-002: Frontend em Angular": arquitetura/adrs/ADR-002-frontend-angular.md
+          - "ADR-003: Backend em NestJS": arquitetura/adrs/ADR-003-backend-nestjs.md
+          - "ADR-004: Firestore & Firebase Auth": arquitetura/adrs/ADR-004-firestore-e-firebase-auth.md
+          - "ADR-005: Máquina de Estados": arquitetura/adrs/ADR-005-maquina-de-estados.md
+          - "ADR-006: Cadeia de Hash SHA-256": arquitetura/adrs/ADR-006-cadeia-de-hash.md
+          - "ADR-007: RBAC e Segregação de Funções": arquitetura/adrs/ADR-007-rbac-e-sod.md
+  - "API (OpenAPI)":
+      - "Especificação OpenAPI v0.1": api/index.md
+  - "Testes e QA":
+      - "Estratégia de Testes": testes/estrategia_de_testes.md
+  - Governança:
+      - "Definition of Done (DoD)": governanca/dod.md

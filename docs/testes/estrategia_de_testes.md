@@ -65,12 +65,32 @@ A stack está definida na Visão do Produto: Angular (frontend), NestJS (backend
 
 ## 5. Matriz de rastreabilidade
 
-A matriz liga cada requisito ao seu critério de aceite, ao teste que o verifica e ao resultado. O formato é este:
+A matriz liga cada requisito ao seu critério de aceite, ao teste que o verifica e ao resultado:
 
-| Requisito | Critério de aceite | Teste | Resultado |
-|---|---|---|---|
-| RF01 / US-01 | CA-01.2: com teto do Gerente = R$ 5.000,00, um pedido de R$ 5.000,01 não pode ser decidido pelo Gerente (403) | CT-01 | Pendente |
-| RF11 / US-05 | CA-05.1: duas decisões simultâneas sobre a mesma solicitação: exatamente 1 sucesso e 1 resposta 409 | CT-02 | Pendente |
-| RNF07 / US-15 | CA-16.1: em acessos cruzados entre tenants, a resposta é 403 ou 404 | CT-TENANT-01 | Pendente |
+| Requisito | Critério de aceite | Teste | Tipo | Resultado |
+|---|---|---|---|---|
+| RNF05 / Base | Inicialização da API e resposta do endpoint raiz | CT-SMOKE-01 | Integração (E2E) | **Passou** |
+| RNF05 / Base | Compilação e build sem erros no monorepo Nx (`web`, `api`, `models`) | CT-BUILD-01 | Build / CI | **Passou** |
+| RNF05 / Base | Execução de testes unitários dos apps (`api`, `web`, `models`) | CT-UNIT-01 | Unitário | **Passou** |
+| RNF07 / US-15 | CA-16.1: em acessos cruzados entre tenants, a resposta é 403 ou 404 | CT-TENANT-01 | Integração (E2E) | **Pendente (Estruturado)** |
+| RF01 / US-01 | CA-01.2: com teto do Gerente = R$ 5.000,00, um pedido de R$ 5.000,01 não pode ser decidido pelo Gerente (403) | CT-01 | Unitário / Regra | Pendente |
+| RF11 / US-05 | CA-05.1: duas decisões simultâneas sobre a mesma solicitação: exatamente 1 sucesso e 1 resposta 409 | CT-02 | Concorrência | Pendente |
 
-O resultado pode ser Passou, Falhou ou Pendente. Os requisitos e critérios de aceite vêm dos Requisitos e das Histórias de Usuário do projeto. A matriz completa, com um teste para cada critério, será entregue no Checkpoint 2.
+O resultado pode ser **Passou**, **Falhou** ou **Pendente**. Os requisitos e critérios de aceite vêm dos [Requisitos](../requisitos.md) e das [Histórias de Usuário](../historias-usuario.md) do projeto. A matriz completa, com um teste para cada critério, será entregue no Checkpoint 2.
+
+## 6. Evidências dos Testes de Integração (Checkpoint 1)
+
+Durante a validação técnica do Checkpoint 1, foram executados e homologados os seguintes testes no monorepo `alcadas-core`:
+
+1. **Teste de Integração de API (`apps/api-e2e`):**
+   - Execução do comando `npx nx run api-e2e:e2e`;
+   - O orquestrador subiu a instância real da API NestJS na porta 3000, realizou a requisição HTTP GET para `/api`, validou o status code `200 OK` e o payload `{ message: 'Hello API' }`, e encerrou o processo liberando a porta com sucesso (tempo total de execução: 0.434s na suíte Jest);
+   - Resultado: **100% dos testes de integração de base passaram com sucesso**.
+
+2. **Isolamento de Tenants (`CT-TENANT-01`):**
+   - Estruturado na branch `test/#4-isolamento-tenant` através da suíte `apps/api-e2e/src/api/tenant-isolation.spec.ts`;
+   - Contém os dois cenários centrais:
+     - *Cenário A:* Usuário da empresa A recebe 403 ou 404 ao tentar consultar solicitação da empresa B (`GET /api/solicitacoes/:id`);
+     - *Cenário B:* Listagem da empresa A não retorna solicitações da empresa B (`GET /api/solicitacoes`).
+   - Conforme previsto para o Checkpoint 1, os testes encontram-se temporariamente marcados com `it.skip` para ativação assim que as rotas de negócio forem conectadas à base no Checkpoint 2.
+
