@@ -1,0 +1,22 @@
+/* Alinhamento justificado para textos da documentação */
+.md-typeset p,
+.md-typeset li,
+.md-typeset td,
+.md-typeset .admonition {
+  text-align: justify;
+}
+
+/* Mantém cabeçalhos de tabela e códigos alinhados à esquerda */
+.md-typeset th,
+.md-typeset pre,
+.md-typeset code {
+  text-align: left;
+}
+
+/* Expande o container do Mermaid para ocupar toda a largura disponível */
+.md-typeset .mermaid {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin: 1.5rem 0;
+}

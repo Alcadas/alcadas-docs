@@ -1,0 +1,27 @@
+# MkDocs build artifact
+site/
+
+# Python virtual environment & cache
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Environment variables and secrets
+.env
+.env.local
+*.local
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.swp
+*.swo

@@ -1,0 +1,75 @@
+site_name: Alçadas
+site_description: Sistema de Workflow de Alçadas de Aprovação e Rastreabilidade Operacional
+site_author: Equipe Alçadas - UnB
+repo_name: Alcadas/alcadas-docs
+repo_url: https://github.com/Alcadas/alcadas-docs
+edit_uri: edit/main/docs/
+
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  language: pt-BR
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+
+plugins:
+  - search
+  - minify:
+      minify_html: true
+
+nav:
+  - Início: index.md
+  - "Visão do Produto": visao-produto.md
+  - Requisitos: requisitos.md
+  - "Histórias de Usuários": historias-usuario.md
+  - Arquitetura: ARCHITECTURE.md
