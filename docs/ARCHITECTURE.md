@@ -115,3 +115,16 @@ flowchart LR
 
 - **Privacidade e LGPD (`RNF04`, `RNF09`):** Coleta estrita de dados corporativos necessários à trilha legal (nome completo, e-mail institucional, cargo/papel, ID de usuário e endereço IP de origem), com retenção de **5 anos após o encerramento do exercício fiscal** e posterior anonimização. Logs técnicos de aplicação são higienizados para exibir **0 ocorrências de PII, senhas ou tokens**.
 - **Desenvolvimento em Emuladores e Controle Orçamentário (`RNF06`, `RNF10`):** O ambiente local sobe integralmente com `docker compose up` utilizando emuladores do Firebase Auth e Firestore, mantendo o gasto na Google Cloud Platform (GCP) abaixo de **US$ 5,00** até a Semana 4 e entre **US$ 4,00 e US$ 10,00** na operação total do ciclo (respeitando o teto de **US$ 50,00** com alertas em 50%, 80% e 100%).
+
+---
+
+## 6. Documentos Complementares de Arquitetura e Governança
+
+Para aprofundamento nos detalhes técnicos do Checkpoint 1, consulte:
+
+- **[Tabela de Transições da Máquina de Estados](arquitetura/tabela-transicoes.md):** Matriz exaustiva com eventos, papéis autorizados, condições de guarda, negações e códigos HTTP de resposta;
+- **[Catálogo de Registros de Decisões de Arquitetura (ADRs)](arquitetura/adrs/index.md):** Justificativas técnicas formais (ADR-001 a ADR-007) no padrão de Michael Nygard;
+- **[Especificação da API REST (OpenAPI v0.1)](api/index.md):** Contratos de entrada, saída, códigos de status e tratamento de erros das 5 jornadas do MVP;
+- **[Definition of Done (DoD)](governanca/dod.md):** Critérios de qualidade e completude em conformidade com o Caderno B2B v2 (Seção 1.6);
+- **[Estratégia de Testes](testes/estrategia_de_testes.md):** Pirâmide de testes, matriz de rastreabilidade e validação de isolamento multi-tenant.
+
