@@ -1,8 +1,8 @@
 site_name: Alçadas
 site_description: Sistema de Workflow de Alçadas de Aprovação e Rastreabilidade Operacional
 site_author: Equipe Alçadas - UnB
-repo_name: Alcadas/docs
-repo_url: https://github.com/Alcadas/docs
+repo_name: Alcadas/alcadas-docs
+repo_url: https://github.com/Alcadas/alcadas-docs
 edit_uri: edit/main/docs/
 
 docs_dir: docs
