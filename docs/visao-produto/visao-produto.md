@@ -1,10 +1,3 @@
-# Visão do Produto e Projeto
-
-**Versão:** 1.1  
-**Projeto:** Alçadas — Sistema de Workflow de Alçadas de Aprovação e Rastreabilidade Operacional
-
----
-
 ## 1. Cenário Atual do Cliente e do Negócio
 
 ### 1.1. Identificação do Cliente/Parceiro

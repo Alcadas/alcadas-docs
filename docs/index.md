@@ -35,7 +35,8 @@ A **Startop LTDA** (prestadora de serviços em clínicas, franquias e construtor
 
 | Seção | Conteúdo |
 | :--- | :--- |
-| **[Visão do Produto e Projeto](visao-produto.md)** | Cenário atual da Startop LTDA, Diagrama de Ishikawa (6M's), objetivos gerais e específicos, características da solução, análise competitiva, viabilidade (9 semanas / US$ 50 GCP) e impacto esperado. |
+| **[Visão do Produto e Projeto](visao-produto/visao-produto.md)** | Cenário atual da Startop LTDA, Diagrama de Ishikawa (6M's), objetivos gerais e específicos, características da solução, análise competitiva, viabilidade (9 semanas / US$ 50 GCP) e impacto esperado. |
+| **[Personas do Usuário](visao-produto/personas.md)** | Definição das 3 personas-alvo da Startop LTDA (Carlos, Mariana e Patrícia), mapas de empatia, dores, cenários de uso e matriz de rastreabilidade. |
 | **[Requisitos do Sistema](requisitos.md)** | Especificação detalhada dos **12 Requisitos Funcionais (`RF01`–`RF12`)**, **12 Regras de Negócio (`RN01`–`RN12`)** e **10 Requisitos Não Funcionais (`RNF01`–`RNF10`)** classificados segundo Sommerville. |
 | **[Histórias de Usuários](historias-usuario.md)** | Backlog completo com **22 Histórias de Usuários (`US-01`–`US-22`)** priorizadas pelo método **MoSCoW** (*Must, Should, Could, Won't*) e seus critérios de aceite testáveis. |
 | **[Arquitetura](ARCHITECTURE.md)** | Arquitetura *Cloud-Native* (Angular, NestJS, Cloud Firestore, Firebase Auth e Docker em monorepo Nx), diagramas da máquina de estados, cadeia de *hashes* SHA-256 e conformidade LGPD. |

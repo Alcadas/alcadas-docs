@@ -69,7 +69,10 @@ plugins:
 
 nav:
   - Início: index.md
-  - "Visão do Produto": visao-produto.md
+  - "Visão do Produto": 
+        - "Cenário atual e Solução proposta" : visao-produto/visao-produto.md
+        - "Personas do Usuário" : visao-produto/personas.md
+        - "Cronograma da Equipe" : visao-produto/cronograma.md
   - Requisitos: requisitos.md
   - "Histórias de Usuários": historias-usuario.md
   - Arquitetura:
