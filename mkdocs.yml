@@ -93,3 +93,5 @@ nav:
       - "Estratégia de Testes": testes/estrategia_de_testes.md
   - Governança:
       - "Definition of Done (DoD)": governanca/dod.md
+  - Sprints: 
+    - "Sprint 1": sprints/relatorio-sprint-1.md
