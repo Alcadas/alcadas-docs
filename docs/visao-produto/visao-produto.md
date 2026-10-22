@@ -18,7 +18,7 @@ A empresa **Startop LTDA** é uma prestadora de serviços independente que atua 
 
 O fluxo operacional da Startop LTDA conecta solicitantes, gestores e o setor financeiro. A falta de um sistema centralizado de alçadas ocasiona ausência de verificação formal de limites financeiros, riscos de adulteração de registros e dificuldades no acompanhamento de aprovações em tempo real.
 
-![Fluxo operacional informal da Startop LTDA e oportunidade de alçadas centralizadas](assets/images/fluxo-informal-startop.png)
+![Fluxo operacional informal da Startop LTDA e oportunidade de alçadas centralizadas](../assets/images/fluxo-informal-startop.png)
 
 ---
 
@@ -43,7 +43,7 @@ A seguir, apresenta-se o **Diagrama de Ishikawa** contendo as causas raízes (or
 - **Meio Ambiente (Contexto Externo):** Exigência crescente de conformidade (*compliance*) por parte das clínicas, franquias e construtoras parceiras.
 - **Problema Principal (Efeito):** Fragilidade na governança financeira, risco de perdas por fracionamento/fraude e incapacidade de auditar aprovações com segurança.
 
-![Diagrama de Ishikawa (6M's) — Fragilidade na governança financeira](assets/images/diagrama-ishikawa.png)
+![Diagrama de Ishikawa (6M's) — Fragilidade na governança financeira](../assets/images/diagrama-ishikawa.png)
 
 ---
 
@@ -110,7 +110,7 @@ A arquitetura do sistema Alçadas foi desenhada sob o paradigma *Cloud-Native*, 
 - **Autenticação e Gestão de Identidade:** O controle de identidades ficará a cargo do **Firebase Auth**, serviço dedicado à validação segura de credenciais e emissão de tokens JWT. Integrado aos mecanismos de proteção (*Guards*) do NestJS e do Angular, ele garantirá o Controle de Acesso Baseado em Papéis (RBAC) e a estrita segregação de funções. Isso garante que a pessoa que solicita uma compra não tenha permissão para aprová-la ou auditar o próprio registro.
 - **Infraestrutura e Padronização de Ambientes:** O projeto adotará o **Docker** para conteinerização da aplicação. O Docker empacota o serviço principal em ambientes isolados e imutáveis, assegurando que o sistema execute de forma idêntica nas máquinas de desenvolvimento e em produção.
 
-> Consulte a página de [Arquitetura](ARCHITECTURE.md) para detalhes técnicos aprofundados dos componentes e fluxos do sistema.
+> Consulte a página de [Arquitetura](../ARCHITECTURE.md) para detalhes técnicos aprofundados dos componentes e fluxos do sistema.
 
 ---
 
