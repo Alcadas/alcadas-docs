@@ -37,9 +37,12 @@ A **Startop LTDA** (prestadora de serviços em clínicas, franquias e construtor
 | :--- | :--- |
 | **[Visão do Produto e Projeto](visao-produto/visao-produto.md)** | Cenário atual da Startop LTDA, Diagrama de Ishikawa (6M's), objetivos gerais e específicos, características da solução, análise competitiva, viabilidade (9 semanas / US$ 50 GCP) e impacto esperado. |
 | **[Personas do Usuário](visao-produto/personas.md)** | Definição das 3 personas-alvo da Startop LTDA (Carlos, Mariana e Patrícia), mapas de empatia, dores, cenários de uso e matriz de rastreabilidade. |
+| **[Processos de Negócio (BPMN)](processos/bpmn-to-be.md)** | Mapeamento formal BPMN 2.0 dos fluxos **[As-Is (informal/planilhas)](processos/bpmn-as-is.md)** e **[To-Be (automatizado com alçadas, SoD e auditoria)](processos/bpmn-to-be.md)**. |
 | **[Requisitos do Sistema](requisitos.md)** | Especificação detalhada dos **12 Requisitos Funcionais (`RF01`–`RF12`)**, **12 Regras de Negócio (`RN01`–`RN12`)** e **10 Requisitos Não Funcionais (`RNF01`–`RNF10`)** classificados segundo Sommerville. |
 | **[Histórias de Usuários](historias-usuario.md)** | Backlog completo com **22 Histórias de Usuários (`US-01`–`US-22`)** priorizadas pelo método **MoSCoW** (*Must, Should, Could, Won't*) e seus critérios de aceite testáveis. |
-| **[Arquitetura](ARCHITECTURE.md)** | Arquitetura *Cloud-Native* (Angular, NestJS, Cloud Firestore, Firebase Auth e Docker em monorepo Nx), diagramas da máquina de estados, cadeia de *hashes* SHA-256 e conformidade LGPD. |
+| **[Arquitetura](ARCHITECTURE.md)** | Arquitetura *Cloud-Native* detalhada, incluindo **[Diagramas de Sequência](arquitetura/diagramas-sequencia.md)**, **[Modelo C4](arquitetura/c4-model.md)**, **[Modelo de Dados & Classes UML](arquitetura/modelo-dados.md)** e **[Modelagem de Ameaças STRIDE](arquitetura/ameacas-stride.md)**. |
+| **[Governança](governanca/matriz-alcadas.md)** | Critérios de qualidade do **[DoD](governanca/dod.md)**, parâmetros da **[Matriz de Alçadas](governanca/matriz-alcadas.md)** e responsabilidades da **[Matriz RACI](governanca/matriz-raci.md)**. |
+| **[Rastreabilidade Bidirecional](rastreabilidade.md)** | Matriz ponta a ponta conectando Dores Ishikawa $\rightarrow$ Jornadas $\rightarrow$ Requisitos $\rightarrow$ Regras $\rightarrow$ USs $\rightarrow$ APIs $\rightarrow$ Testes. |
 
 ---
 

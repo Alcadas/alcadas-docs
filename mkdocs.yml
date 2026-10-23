@@ -10,6 +10,7 @@ site_dir: site
 
 theme:
   name: material
+  custom_dir: overrides
   language: pt-BR
   palette:
     - scheme: default
@@ -61,6 +62,8 @@ extra_css:
 extra_javascript:
   - javascripts/mathjax.js
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+  - javascripts/panzoom.min.js
+  - javascripts/panzoom-init.js
 
 plugins:
   - search
@@ -69,14 +72,22 @@ plugins:
 
 nav:
   - Início: index.md
-  - "Visão do Produto": 
-        - "Cenário atual e Solução proposta" : visao-produto/visao-produto.md
-        - "Personas do Usuário" : visao-produto/personas.md
-        - "Cronograma da Equipe" : visao-produto/cronograma.md
-  - Requisitos: requisitos.md
-  - "Histórias de Usuários": historias-usuario.md
+  - "Visão do Produto":
+      - "Cenário atual e Solução proposta": visao-produto/visao-produto.md
+      - "Personas do Usuário": visao-produto/personas.md
+      - "Cronograma da Equipe": visao-produto/cronograma.md
+      - "Processos de Negócio (BPMN)":
+          - "Processo Atual (As-Is)": processos/bpmn-as-is.md
+          - "Processo Proposto (To-Be)": processos/bpmn-to-be.md
+  - "Requisitos":
+      - "Requisitos do Sistema": requisitos.md
+      - "Histórias de Usuários": historias-usuario.md
   - Arquitetura:
       - "Visão Geral": ARCHITECTURE.md
+      - "Diagramas de Sequência": arquitetura/diagramas-sequencia.md
+      - "Modelo C4": arquitetura/c4-model.md
+      - "Modelo de Dados & Classes": arquitetura/modelo-dados.md
+      - "Modelagem de Ameaças (STRIDE)": arquitetura/ameacas-stride.md
       - "Tabela de Transições": arquitetura/tabela-transicoes.md
       - "Decisões de Arquitetura (ADRs)":
           - "Catálogo de ADRs": arquitetura/adrs/index.md
@@ -93,3 +104,6 @@ nav:
       - "Estratégia de Testes": testes/estrategia_de_testes.md
   - Governança:
       - "Definition of Done (DoD)": governanca/dod.md
+      - "Matriz de Alçadas": governanca/matriz-alcadas.md
+      - "Matriz RACI": governanca/matriz-raci.md
+  - Rastreabilidade: rastreabilidade.md

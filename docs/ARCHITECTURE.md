@@ -120,11 +120,17 @@ flowchart LR
 
 ## 6. Documentos Complementares de Arquitetura e Governança
 
-Para aprofundamento nos detalhes técnicos do Checkpoint 1, consulte:
+Para aprofundamento nos detalhes técnicos do sistema, consulte os artefatos dedicados:
 
+- **[Diagramas de Sequência UML](arquitetura/diagramas-sequencia.md):** Fluxos dinâmicos de concorrência atômica (`HTTP 409`), motor de riscos, verificação da cadeia de hash e bloqueio SoD;
+- **[Arquitetura C4 Model](arquitetura/c4-model.md):** Diagramas hierárquicos de Contexto (Nível 1), Contêineres (Nível 2) e Componentes NestJS/Angular (Nível 3);
+- **[Modelo de Dados e Classes de Domínio](arquitetura/modelo-dados.md):** Diagrama de Classes UML e modelagem NoSQL do Cloud Firestore com subcoleções e índices compostos;
+- **[Modelagem de Ameaças (STRIDE)](arquitetura/ameacas-stride.md):** Análise formal de riscos de segurança cibernética e mitigação técnica segundo a taxonomia STRIDE e conformidade LGPD;
 - **[Tabela de Transições da Máquina de Estados](arquitetura/tabela-transicoes.md):** Matriz exaustiva com eventos, papéis autorizados, condições de guarda, negações e códigos HTTP de resposta;
 - **[Catálogo de Registros de Decisões de Arquitetura (ADRs)](arquitetura/adrs/index.md):** Justificativas técnicas formais (ADR-001 a ADR-007) no padrão de Michael Nygard;
 - **[Especificação da API REST (OpenAPI v0.1)](api/index.md):** Contratos de entrada, saída, códigos de status e tratamento de erros das 5 jornadas do MVP;
+- **[Matriz de Alçadas](governanca/matriz-alcadas.md) & [Matriz RACI](governanca/matriz-raci.md):** Tetos financeiros parametrizados por nível e governança de responsabilidades;
+- **[Matriz de Rastreabilidade Bidirecional](rastreabilidade.md):** Mapeamento ponta a ponta desde as dores no Ishikawa até os testes de unidade e E2E;
 - **[Definition of Done (DoD)](governanca/dod.md):** Critérios de qualidade e completude em conformidade com o Caderno B2B v2 (Seção 1.6);
 - **[Estratégia de Testes](testes/estrategia_de_testes.md):** Pirâmide de testes, matriz de rastreabilidade e validação de isolamento multi-tenant.
 
