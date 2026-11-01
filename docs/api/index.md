@@ -1,26 +1,46 @@
-# Especificação OpenAPI v0.1
+# Especificação OpenAPI v0.2.0
 
-Esta página apresenta a especificação formal da API REST do **Alçadas** para o **Checkpoint 1**, conforme estabelecido no **Guia do Checkpoint 1**.
+Contrato da API REST do **Alçadas** no **Checkpoint 2** (núcleo funcional rodando localmente). O arquivo fonte, validado contra o schema oficial do OpenAPI 3.0, está em [`docs/api/openapi.yaml`](openapi.yaml). As convenções estão no [ADR-009](../arquitetura/adrs/ADR-009-contrato-api-v0-2.md).
 
-A API documenta os contratos de entrada, saída, códigos de status e tratamento de erros das operações essenciais: submissão de pedidos, aprovação, bloqueio/rejeição/ajuste, consulta isolada por tenant e trilha de auditoria criptográfica.
+- Todas as rotas usam o prefixo **`/api`** (ex.: `http://localhost:3000/api/solicitacoes`).
+- Todas exigem `Authorization: Bearer <token do Firebase Auth>`, **exceto** `/healthz` e `/readyz`.
+- O tenant e o papel vêm sempre do token. Nenhuma rota recebe `tenantId` na URL ou no corpo.
+- A coluna **Situação** mostra o que já está no código: ✅ no `develop` · 🔍 em PR aberto · ⏳ previsto.
 
-O arquivo fonte validado em formato OpenAPI 3.0.3 está disponível em: [`docs/api/openapi.yaml`](openapi.yaml).
+---
+
+## Histórico de versões
+
+| Versão | Data | Mudanças |
+| :--- | :--- | :--- |
+| **0.2.0** | 01/11/2026 | Jornada 1 (`/centros-custo`, `/alcadas/tetos`); `/healthz` e `/readyz` públicos; `versao` obrigatório nas decisões; respostas `403`/`404`/`409` detalhadas com códigos `TRANSICAO_INVALIDA` e `CONFLITO_VERSAO`; campo `motivo` na verificação da trilha; paginação limitada a 50; servidor fictício de produção removido; extensão `x-implementado`. |
+| 0.1.0 | 18/10/2026 | Contrato inicial do Checkpoint 1 (solicitações, decisão e trilha). |
 
 ---
 
 ## 1. Visão Geral dos Endpoints
 
-| Método | Endpoint | Responsabilidade | Papel Mínimo | Respostas de Sucesso | Erros Mapeados |
-| :---: | :--- | :--- | :---: | :---: | :---: |
-| `POST` | `/solicitacoes` | Submissão de novo pedido de compra/reembolso | `SOLICITANTE` | `201 Created` | `400`, `401`, `403` |
-| `GET` | `/solicitacoes` | Listagem com isolamento estrito de tenant | Qualquer autenticado | `200 OK` | `401` |
-| `GET` | `/solicitacoes/{id}` | Consulta detalhada de uma solicitação | Usuário do Tenant | `200 OK` | `401`, `403`, `404` |
-| `POST` | `/solicitacoes/{id}/aprovar` | Parecer favorável e avanço para `APROVADA` | `USER_NORMAL` / `SUPER_USER` | `200 OK` | `400`, `401`, `403`, `409` |
-| `POST` | `/solicitacoes/{id}/rejeitar` | Reprovação formal com justificativa (≥ 10 chars) | `USER_NORMAL` / `SUPER_USER` | `200 OK` | `400`, `401`, `403`, `409` |
-| `POST` | `/solicitacoes/{id}/ajuste` | Devolução para complementação pelo solicitante | `USER_NORMAL` / `SUPER_USER` | `200 OK` | `400`, `401`, `403`, `409` |
-| `GET` | `/solicitacoes/{id}/trilha` | Consulta dos elos e selos SHA-256 encadeados | Usuário do Tenant | `200 OK` | `401`, `403`, `404` |
-| `POST` | `/solicitacoes/{id}/trilha/verificar` | Verificação determinística da higidez dos hashes | Auditor / Admin | `200 OK` | `401`, `403`, `404` |
-| `GET` | `/solicitacoes/{id}/trilha/exportar` | Exportação auditável da cadeia em CSV ou JSON | Auditor / Admin | `200 OK` | `401`, `403` |
+| Método | Endpoint | Responsabilidade | Papel | Sucesso | Erros | Situação |
+| :---: | :--- | :--- | :--- | :---: | :---: | :---: |
+| `GET` | `/healthz` | Processo no ar | Público | `200` | — | 🔍 |
+| `GET` | `/readyz` | API consegue falar com o Firestore | Público | `200` | `503` | 🔍 |
+| `POST` | `/centros-custo` | Cadastrar centro de custo (US-01) | `ADMIN` | `201` | `400`, `401`, `403`, `409` | 🔍 `#14` |
+| `GET` | `/centros-custo` | Listar centros de custo do tenant | Autenticado | `200` | `401` | 🔍 `#14` |
+| `PUT` | `/alcadas/tetos` | Configurar tetos N1, N2, N3 (CA-01.1) | `ADMIN` | `200` | `400`, `401`, `403`, `404` | 🔍 `#14` |
+| `GET` | `/alcadas/tetos` | Consultar tetos vigentes | Autenticado | `200` | `401` | 🔍 `#14` |
+| `POST` | `/solicitacoes` | Submeter pedido (US-02, T01) | `SOLICITANTE` | `201` | `400`, `401`, `403` | 🔍 `#18` |
+| `GET` | `/solicitacoes` | Listar com paginação (`page`, `limit ≤ 50`) | Autenticado | `200` | `400`, `401` | 🔍 `#18` |
+| `GET` | `/solicitacoes/{id}` | Detalhe da solicitação | Autenticado do tenant | `200` | `401`, `403`, `404` | ⏳ |
+| `POST` | `/solicitacoes/{id}/aprovar` | Aprovar (T02) | Aprovadores | `200` | `400`, `401`, `403`, `404`, `409` | ✅ |
+| `POST` | `/solicitacoes/{id}/rejeitar` | Rejeitar com motivo ≥ 10 (T03) | Aprovadores | `200` | `400`, `401`, `403`, `404`, `409` | ✅ |
+| `POST` | `/solicitacoes/{id}/ajuste` | Pedir ajuste com motivo ≥ 10 (T04) | Aprovadores | `200` | `400`, `401`, `403`, `404`, `409` | ✅ |
+| `GET` | `/solicitacoes/{id}/trilha` | Elos SHA-256 da solicitação (US-07) | Aprovadores, `AUDITOR`, `ADMIN`, autor | `200` | `401`, `403`, `404` | 🔍 |
+| `POST` | `/solicitacoes/{id}/trilha/verificar` | Recalcular a cadeia e apontar adulteração (US-08) | Aprovadores, `AUDITOR`, `ADMIN`, autor | `200` | `401`, `403`, `404` | 🔍 |
+| `GET` | `/solicitacoes/{id}/trilha/exportar` | Exportar CSV/JSON (US-13) | `AUDITOR`, `ADMIN` | `200` | `401`, `403` | ⏳ CP3 |
+
+**Aprovadores** = `USER_NORMAL`, `SUPER_USER`, `APROVADOR_N1`, `APROVADOR_N2`, `DIRETOR_CFO` (ver [ADR-007](../arquitetura/adrs/ADR-007-rbac-e-sod.md)). O papel libera a rota; o teto da alçada e o SoD são conferidos em seguida, no caso de uso.
+
+**Fora do contrato v0.2 (próximas versões):** reenvio após ajuste (`T05`) e cancelamento (`T06`), delegações (`RF04`/`US-10`).
 
 ---
 
@@ -56,7 +76,8 @@ Aprova formalmente o pedido, garantindo que o valor respeite a alçada do aprova
   ```
 - **Regras de Bloqueio e Erros:**
   - `403 Forbidden`: Se `solicitanteId === aprovadorId` (Bloqueio de SoD - grava **Log 8**) ou se `valor > tetoAlcada`;
-  - `409 Conflict`: Se a solicitação já se encontrar em estado terminal (`APROVADA` ou `REJEITADA`), ou se a versão fornecida divergir da versão persistida (outro aprovador decidiu simultaneamente - `CA-05.1`).
+  - `409 Conflict` com `error: "TRANSICAO_INVALIDA"`: a solicitação não está `PENDENTE` (já `APROVADA`, `REJEITADA` ou `EM_AJUSTE` — `CA-03.4`);
+  - `409 Conflict` com `error: "CONFLITO_VERSAO"`: `versao` ausente, desatualizada ou outro aprovador decidiu no mesmo instante (`CA-05.1`). Dois cliques simultâneos em "Aprovar" geram exatamente um `200` e um `409`.
 
 ---
 
@@ -121,6 +142,7 @@ Recalcula determinísticamente todos os hashes SHA-256 da cadeia em menos de 1 s
     "totalElos": 2,
     "tempoProcessamentoMs": 18.4,
     "eloInconsistente": null,
+    "motivo": null,
     "mensagem": "Todos os selos criptográficos SHA-256 coincidem deterministicamente."
   }
   ```
@@ -131,9 +153,19 @@ Recalcula determinísticamente todos os hashes SHA-256 da cadeia em menos de 1 s
     "totalElos": 2,
     "tempoProcessamentoMs": 16.1,
     "eloInconsistente": 1,
-    "mensagem": "Divergência detectada no recálculo do elo 1: o hash armazenado não confere com os dados atuais do registro."
+    "motivo": "HASH_DIVERGENTE",
+    "mensagem": "Inconsistente / Adulterado: o elo 1 falhou na verificação (HASH_DIVERGENTE)."
   }
   ```
+
+---
+
+### 2.6. Configuração de tetos (`PUT /alcadas/tetos`)
+Grava a matriz de alçadas de um centro de custo. Teto vazio, zero ou negativo → `400` e nada é gravado (`CA-01.1`).
+
+```json
+{ "centroCustoId": "cc-clinica-centro", "N1": 1000.00, "N2": 5000.00, "N3": null }
+```
 
 ---
 
@@ -149,3 +181,5 @@ Todas as respostas de erro da API seguem a estrutura JSON padronizada:
   "timestamp": "2026-10-20T18:30:00.000Z"
 }
 ```
+
+Em respostas `400` de validação, o campo opcional `campos` lista os atributos inválidos (ex.: `["valor"]`). Em `409`, o campo `error` traz `TRANSICAO_INVALIDA` ou `CONFLITO_VERSAO`.
