@@ -14,7 +14,18 @@ Este catálogo documenta os **Registros de Decisões de Arquitetura** (*Architec
 | [**ADR-004**](ADR-004-firestore-e-firebase-auth.md) | Persistência com Cloud Firestore e Firebase Auth | **Aceito** | `RNF01`, `RNF06`, `RNF07`, `RNF10` | 2026-10-18 |
 | [**ADR-005**](ADR-005-maquina-de-estados.md) | Máquina de Estados Finita e Controle de Concorrência Otimista | **Aceito** | `RF03`, `RF10`, `RF11` (`US-05`) | 2026-10-18 |
 | [**ADR-006**](ADR-006-cadeia-de-hash.md) | Trilha de Auditoria Criptográfica com Hashes SHA-256 | **Aceito** | `RF07`, `RF08`, `RNF02` (`US-07`, `US-08`) | 2026-10-18 |
-| [**ADR-007**](ADR-007-rbac-e-sod.md) | Controle de Acesso por Papéis (RBAC) e Segregação de Funções (SoD) | **Aceito** | `RNF03`, `RF03`, `RF04`, `RF12` (`US-04`) | 2026-10-18 |
+| [**ADR-007**](ADR-007-rbac-e-sod.md) | Controle de Acesso por Papéis (RBAC) e Segregação de Funções (SoD) | **Aceito** (Camada 2 substituída pelo ADR-008) | `RNF03`, `RF03`, `RF04`, `RF12` (`US-04`) | 2026-10-18 |
+| [**ADR-008**](ADR-008-firestore-deny-all.md) | Firestore fechado para o navegador (Security Rules deny-all) | **Aceito** | `RNF03`, `RNF07`, `RF07` | 2026-11-01 |
+| [**ADR-009**](ADR-009-contrato-api-v0-2.md) | Convenções do contrato da API (OpenAPI v0.2.0) | **Aceito** | `RNF07`, todas as jornadas | 2026-11-01 |
+| [**ADR-010**](ADR-010-concorrencia-otimista-rest.md) | Concorrência otimista por precondição do Firestore (CP2) | **Aceito** (provisório) | `RF11` (`US-05`), `RF07` | 2026-11-01 |
+
+---
+
+## Decisões do Checkpoint 2
+
+- **ADR-008** fecha o Firestore para o navegador: todo acesso passa pela API, que é o único caminho que aplica máquina de estados, RBAC/SoD e trilha.
+- **ADR-009** fixa as convenções do contrato (rotas em português sob `/api`, tenant sempre do token, uma rota por operação, `x-implementado`).
+- **ADR-010** registra como a concorrência otimista do ADR-005 foi implementada enquanto a API usa o Firestore via REST, e o plano de migração para `runTransaction()`.
 
 ---
 
