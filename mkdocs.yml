@@ -98,12 +98,18 @@ nav:
           - "ADR-005: Máquina de Estados": arquitetura/adrs/ADR-005-maquina-de-estados.md
           - "ADR-006: Cadeia de Hash SHA-256": arquitetura/adrs/ADR-006-cadeia-de-hash.md
           - "ADR-007: RBAC e Segregação de Funções": arquitetura/adrs/ADR-007-rbac-e-sod.md
+          - "ADR-008: Firestore deny-all": arquitetura/adrs/ADR-008-firestore-deny-all.md
+          - "ADR-009: Contrato da API v0.2": arquitetura/adrs/ADR-009-contrato-api-v0-2.md
+          - "ADR-010: Concorrência otimista (CP2)": arquitetura/adrs/ADR-010-concorrencia-otimista-rest.md
+          - "ADR-011: Plano Custo Zero (Render + Spark)": arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md
   - "API (OpenAPI)":
-      - "Especificação OpenAPI v0.1": api/index.md
+      - "Especificação OpenAPI v0.2": api/index.md
   - "Testes e QA":
       - "Estratégia de Testes": testes/estrategia_de_testes.md
   - Governança:
       - "Definition of Done (DoD)": governanca/dod.md
+      - "Regras do Repositório": governanca/regras-repositorio.md
       - "Matriz de Alçadas": governanca/matriz-alcadas.md
       - "Matriz RACI": governanca/matriz-raci.md
   - Rastreabilidade: rastreabilidade.md
+  - "FinOps — Custo Zero": finops/index.md

@@ -1,7 +1,7 @@
 # ADR-005: Máquina de Estados Finita e Controle de Concorrência Otimista (OCC)
 
 ## Status
-**Aceito** (Checkpoint 1)
+**Aceito** (Checkpoint 1) — implementação do Checkpoint 2 detalhada no **[ADR-010](ADR-010-concorrencia-otimista-rest.md)**.
 
 ## Data
 2026-10-18

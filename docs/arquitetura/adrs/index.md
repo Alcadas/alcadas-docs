@@ -14,7 +14,20 @@ Este catálogo documenta os **Registros de Decisões de Arquitetura** (*Architec
 | [**ADR-004**](ADR-004-firestore-e-firebase-auth.md) | Persistência com Cloud Firestore e Firebase Auth | **Aceito** | `RNF01`, `RNF06`, `RNF07`, `RNF10` | 2026-10-18 |
 | [**ADR-005**](ADR-005-maquina-de-estados.md) | Máquina de Estados Finita e Controle de Concorrência Otimista | **Aceito** | `RF03`, `RF10`, `RF11` (`US-05`) | 2026-10-18 |
 | [**ADR-006**](ADR-006-cadeia-de-hash.md) | Trilha de Auditoria Criptográfica com Hashes SHA-256 | **Aceito** | `RF07`, `RF08`, `RNF02` (`US-07`, `US-08`) | 2026-10-18 |
-| [**ADR-007**](ADR-007-rbac-e-sod.md) | Controle de Acesso por Papéis (RBAC) e Segregação de Funções (SoD) | **Aceito** | `RNF03`, `RF03`, `RF04`, `RF12` (`US-04`) | 2026-10-18 |
+| [**ADR-007**](ADR-007-rbac-e-sod.md) | Controle de Acesso por Papéis (RBAC) e Segregação de Funções (SoD) | **Aceito** (Camada 2 substituída pelo ADR-008) | `RNF03`, `RF03`, `RF04`, `RF12` (`US-04`) | 2026-10-18 |
+| [**ADR-008**](ADR-008-firestore-deny-all.md) | Firestore fechado para o navegador (Security Rules deny-all) | **Aceito** | `RNF03`, `RNF07`, `RF07` | 2026-11-01 |
+| [**ADR-009**](ADR-009-contrato-api-v0-2.md) | Convenções do contrato da API (OpenAPI v0.2.0) | **Aceito** | `RNF07`, todas as jornadas | 2026-11-01 |
+| [**ADR-010**](ADR-010-concorrencia-otimista-rest.md) | Concorrência otimista por precondição do Firestore (CP2) | **Aceito** (provisório) | `RF11` (`US-05`), `RF07` | 2026-11-01 |
+| [**ADR-011**](ADR-011-hospedagem-render-firebase-spark.md) | Plano Custo Zero: API no Render e Firebase no plano Spark (sem voucher do GCP) | **Aceito pela equipe** (aguarda aprovação do professor) | `RNF05`, `RNF06` | 2026-11-01 |
+
+---
+
+## Decisões do Checkpoint 2
+
+- **ADR-008** fecha o Firestore para o navegador: todo acesso passa pela API, que é o único caminho que aplica máquina de estados, RBAC/SoD e trilha.
+- **ADR-009** fixa as convenções do contrato (rotas em português sob `/api`, tenant sempre do token, uma rota por operação, `x-implementado`).
+- **ADR-010** registra como a concorrência otimista do ADR-005 foi implementada enquanto a API usa o Firestore via REST, e o plano de migração para `runTransaction()`.
+- **ADR-011** adota o Plano Custo Zero: sem conta de faturamento no GCP, frontend no Firebase Hosting, Auth e Firestore no Spark e API no Render. Lista as exceções ao Caderno que dependem da aprovação do professor.
 
 ---
 
@@ -24,4 +37,4 @@ As decisões de arquitetura foram orientadas por três pilares inegociáveis do 
 
 1. **Governança Estrita e Imutabilidade:** Garantir que nenhuma aprovação ocorra sem limite verificado, que autoaprovações sejam sumariamente bloqueadas (*SoD*) e que qualquer adulteração manual na base de dados seja detectada deterministicamente em menos de 1 segundo através de elos criptográficos SHA-256 encadeados.
 2. **Tempo Real e Usabilidade:** Assegurar atualização dos painéis operacionais sem necessidade de recarregar páginas (`< 1,5 s`), com tratamento visual explícito de *loading*, *empty* e *error*.
-3. **Eficiência Orçamentária e Portabilidade:** Permitir execução 100% autônoma em ambiente local de desenvolvimento através do Docker Compose e dos emuladores do Firebase, limitando o consumo de nuvem (teto de US$ 50,00 na GCP) e garantindo paridade de ambientes.
+3. **Eficiência Orçamentária e Portabilidade:** Permitir execução 100% autônoma em ambiente local de desenvolvimento através do Docker Compose e dos emuladores do Firebase, limitando o consumo de nuvem (meta de US$ 0 no Plano Custo Zero — ADR-011) e garantindo paridade de ambientes.
