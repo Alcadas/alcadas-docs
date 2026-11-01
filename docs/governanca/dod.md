@@ -18,6 +18,8 @@ Para que qualquer *Pull Request (PR)* ou item do backlog seja dado como *Pronto 
 
 ### 2. Cobertura de Testes e Critérios de Aceite das User Stories
 - Todos os Critérios de Aceite (CAs) vinculados à respectiva *User Story* foram explicitamente verificados e possuem evidências ou asserções automatizadas;
+- **Toda mudança de regra traz pelo menos um teste novo ligado a um critério de aceite**, com o código do CA no nome do teste (ex.: `CA-05.1: duas aprovações simultâneas → uma 200 e outra 409`);
+- O resultado do teste está registrado na [matriz de rastreabilidade](../rastreabilidade.md) e no relatório de testes em `/docs` (evidência vinculada ao relatório);
 - A cobertura de código não pode sofrer regressão em relação à baseline do projeto;
 - Valores de borda e partições de equivalência (EP/BVA) foram testados conforme a [Estratégia de Testes](../testes/estrategia_de_testes.md).
 
@@ -29,18 +31,20 @@ Para que qualquer *Pull Request (PR)* ou item do backlog seja dado como *Pronto 
 ### 4. Padrões de Código, Linter e Formatação
 - O código está em conformidade com as regras de estilo definidas no `.editorconfig`, ESLint e Prettier;
 - Não há variáveis órfãs, tipos `any` injustificados ou violações de arquitetura limpa;
-- Ausência total de segredos de autenticação, senhas ou dados pessoais identificáveis (PII) em código ou logs (`RNF09`);
+- **Nenhum segredo** (senha, chave de API, token, arquivo `.env`) no código ou no histórico do PR;
+- **Logs sem dados pessoais** (nome, e-mail, CPF, telefone): registrar só identificadores técnicos (`userId`, `tenantId`, `requestId`) (`RNF09`);
 - **Comando de validação local:** `npm run lint` e `npm run format:check`.
 
 ### 5. Documentação Técnica Atualizada
 - Qualquer nova rota ou alteração de contrato foi refletida na especificação [OpenAPI v0.1](../api/index.md) (`docs/api/openapi.yaml`);
 - Novas decisões arquiteturais ou mudanças em persistência/segurança possuem o respectivo [ADR](../arquitetura/adrs/index.md) documentado;
+- **Nenhum recurso novo no GCP/Firebase** (serviço, banco, job, bucket, instância) é criado sem ADR ou aprovação registrada do Tech Lead no PR;
 - O `README.md` e os guias de contribuição estão atualizados com eventuais novos comandos ou dependências.
 
 ### 6. Revisão de Código por Pares (Peer Review)
-- Todo Pull Request deve ser avaliado e aprovado formalmente por no mínimo **um revisor par** ou pelo **Tech Lead / QA Lead** antes da mesclagem;
+- Todo Pull Request deve ser aprovado por **pelo menos uma pessoa diferente do autor** (par, Tech Lead ou QA) antes da mesclagem — o [CODEOWNERS](regras-repositorio.md) chama o revisor da área automaticamente;
 - O revisor deve validar a clareza do código, a fidelidade aos requisitos de negócio e a ausência de vulnerabilidades de segurança;
-- Nenhuma mesclagem direta na branch `main` ou `develop` é permitida sem PR aprovado.
+- Nenhuma mesclagem direta na branch `main` ou `develop` é permitida sem PR aprovado e CI verde — a regra é aplicada pela [proteção de branch](regras-repositorio.md).
 
 ---
 
@@ -62,4 +66,11 @@ Além dos seis itens gerais do Caderno B2B, a equipe do **Alçadas** estabelece 
 
 Para assegurar que nenhum item da DoD seja esquecido pelos desenvolvedores, todos os 6 itens mínimos do Caderno B2B e os critérios do projeto estão incorporados como caixas de seleção obrigatórias no template de submissão do GitHub:
 
-👉 [Visualizar Template de Pull Request](https://github.com/Alcadas/alcadas-docs/blob/main/.github/PULL_REQUEST_TEMPLATE.md)
+- [Template de PR do `alcadas-core`](https://github.com/Alcadas/alcadas-core/blob/develop/.github/PULL_REQUEST_TEMPLATE.md) (código)
+- [Template de PR do `alcadas-docs`](https://github.com/Alcadas/alcadas-docs/blob/main/.github/PULL_REQUEST_TEMPLATE.md) (documentação)
+
+---
+
+## 4. DoD em uma frase (Caderno B2B v2)
+
+> Uma história só está concluída quando tem **implementação, teste, critério de aceite validado, PR revisado por outra pessoa, CI verde, documentação atualizada e evidência vinculada ao relatório**.
