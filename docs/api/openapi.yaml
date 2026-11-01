@@ -26,7 +26,7 @@ info:
 
 servers:
   - url: http://localhost:3000/api
-    description: Desenvolvimento local (docker compose + emuladores Firebase). A URL de produção (Firebase Hosting com rewrite /api → Cloud Run) entra no Checkpoint 3.
+    description: Desenvolvimento local (docker compose + emuladores Firebase). A API publicada fica no Render (Checkpoint 3) e é chamada direto pelo frontend no Firebase Hosting, com CORS restrito ao domínio da equipe (ADR-011).
 
 tags:
   - name: Saúde
@@ -481,7 +481,7 @@ paths:
   /healthz:
     get:
       summary: Liveness
-      description: Indica que o processo da API está de pé. Não consulta o banco.
+      description: Indica que o processo da API está de pé. Não consulta o banco. É o health check do Render (ADR-011).
       operationId: healthz
       tags: [Saúde]
       x-implementado: em-revisao
@@ -497,7 +497,7 @@ paths:
   /readyz:
     get:
       summary: Readiness
-      description: Indica que a API consegue falar com o Firestore. Usado pelo compose, pelo CI e, no CP3, pelo Cloud Run.
+      description: Indica que a API consegue falar com o Firestore. Monitorado pelo UptimeRobot no ambiente publicado (ADR-011).
       operationId: readyz
       tags: [Saúde]
       x-implementado: em-revisao

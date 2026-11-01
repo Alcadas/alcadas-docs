@@ -12,7 +12,7 @@
 
 O [ADR-005](ADR-005-maquina-de-estados.md) definiu que cada transição roda em `firestore.runTransaction()`, conferindo o campo `versao` e gravando o elo da trilha na mesma transação.
 
-A API do `develop` acessa o emulador do Firestore pela **API REST** (via `axios`), sem o Admin SDK, e a primeira versão da decisão do aprovador (`alcadas-core#15`) protegia a concorrência com um *lock* em memória. Esse lock não funciona com mais de uma instância da API (Cloud Run, Checkpoint 3) e não protege contra escrita feita por outro processo.
+A API do `develop` acessa o emulador do Firestore pela **API REST** (via `axios`), sem o Admin SDK, e a primeira versão da decisão do aprovador (`alcadas-core#15`) protegia a concorrência com um *lock* em memória. Esse lock se perde a cada reinício ou deploy da API (o Render reinicia o serviço gratuito quando ele dorme) e não protege contra escrita feita por outro processo ou por mais de uma instância.
 
 O Admin SDK (`firebase-admin`) entra junto com o PR de submissão (`alcadas-core#18`), ainda em revisão.
 

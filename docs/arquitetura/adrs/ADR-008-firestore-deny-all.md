@@ -53,4 +53,4 @@ Liberar acesso direto ao navegador criaria um segundo caminho de escrita que nã
 - **Tempo real (`RNF01`)** não pode usar `onSnapshot` direto do navegador.
   *Mitigação:* no CP2 o frontend recarrega por chamada à API; se o requisito de < 1,5 s exigir push, avaliar SSE/WebSocket pela API ou abrir leitura restrita por ADR próprio.
 - Todo acesso depende da disponibilidade da API.
-  *Mitigação:* `/readyz` e alertas de 5xx no Checkpoint 3.
+  *Mitigação:* `/readyz` monitorado pelo UptimeRobot com alerta por e-mail (ADR-011).

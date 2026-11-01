@@ -48,9 +48,9 @@ flowchart LR
 | **RNF01** | Sincronização em Tempo Real | $< 1,5$ s entre backend e interfaces abertas | Firestore Real-time Streams + Angular | Teste E2E de latência de propagação de eventos. |
 | **RNF02** | Imutabilidade e Integridade | Validação de cadeia SHA-256 em $< 1$ s | `CryptoAuditService` (Node.js crypto) | Benchmark automatizado com cadeia de 1.000 elos. |
 | **RNF03** | Segregação de Funções e RBAC | 100% de rejeição (`HTTP 403`) fora de papel | `FirebaseAuthGuard`, `RBACGuard`, `SoDGuard` | Testes de matriz de permissões cobrindo todos os endpoints. |
-| **RNF04** | Retenção Legal e LGPD | 5 anos de retenção e posterior anonimização | Rotina de Expurgos / Cloud Scheduler | Teste unitário da função de higienização de autor. |
+| **RNF04** | Retenção Legal e LGPD | 5 anos de retenção e posterior anonimização | Rotina de expurgo (agendamento via GitHub Actions, se entrar no escopo — ADR-011) | Teste unitário da função de higienização de autor. |
 | **RNF05** | Padronização em Contêineres | 100% reprodutível via imagem Docker | `Dockerfile`, `docker-compose.yml` | Pipeline de CI executando build e smoke tests nos contêineres. |
-| **RNF06** | Controle Orçamentário Nuvem | Gastos GCP $< \text{US\$} 5,00$ até Sem. 4 / Teto US$ 50 | GCP Budget Alerts (50%, 80%, 100%) | Relatório de custos gerado semanalmente pelo Cloud Billing. |
+| **RNF06** | Controle Orçamentário Nuvem | Gasto = US$ 0,00 (plano custo zero) | Firebase Spark + Render gratuito, sem forma de pagamento ([ADR-011](arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md)) | Prints de cada serviço no plano gratuito em [`/docs/finops`](finops/index.md), a cada checkpoint. |
 | **RNF07** | Isolamento Multi-tenant | 100% de bloqueio (`HTTP 403/404`) de cross-tenant | `TenantContextService` + Firestore Rules | Teste automatizado tentando ler doc do Tenant B com JWT do Tenant A. |
 | **RNF08** | Estados Visuais de Interface | 100% das telas com Loading, Empty e Error | Componentes de UI Angular | Testes de snapshot e validação visual de QA do *DoD*. |
 | **RNF09** | Omissão de PII em Logs | 0 ocorrências de PII, senhas ou tokens em logs | Interceptor NestJS `SanitizeLogsInterceptor` | Auditoria estática de logs de saída durante suíte de testes. |
