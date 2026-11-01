@@ -49,4 +49,4 @@ Feita por quem é **admin** da organização em **Settings → Branches → Add 
 - Contrato OpenAPI atualizado quando a rota muda ([ADR-009](../arquitetura/adrs/ADR-009-contrato-api-v0-2.md)).
 - Isolamento de tenant e papel nas rotas tocadas ([ADR-007](../arquitetura/adrs/ADR-007-rbac-e-sod.md)).
 - Nenhum segredo no código e nenhum dado pessoal em log.
-- Nenhum recurso novo no GCP sem ADR ou aprovação do Tech Lead.
+- Nenhum serviço novo (Firebase, Render…) sem ADR ou aprovação do Tech Lead, e nada que exija cartão ou plano Blaze ([FinOps](../finops/index.md)).

@@ -38,7 +38,7 @@ Para que qualquer *Pull Request (PR)* ou item do backlog seja dado como *Pronto 
 ### 5. Documentação Técnica Atualizada
 - Qualquer nova rota ou alteração de contrato foi refletida na especificação [OpenAPI v0.1](../api/index.md) (`docs/api/openapi.yaml`);
 - Novas decisões arquiteturais ou mudanças em persistência/segurança possuem o respectivo [ADR](../arquitetura/adrs/index.md) documentado;
-- **Nenhum recurso novo no GCP/Firebase** (serviço, banco, job, bucket, instância) é criado sem ADR ou aprovação registrada do Tech Lead no PR;
+- **Nenhum serviço ou recurso novo** (Firebase, Render ou qualquer outro) é ativado sem ADR ou aprovação registrada do Tech Lead no PR, e **nunca com cartão cadastrado** ([FinOps](../finops/index.md));
 - O `README.md` e os guias de contribuição estão atualizados com eventuais novos comandos ou dependências.
 
 ### 6. Revisão de Código por Pares (Peer Review)
@@ -58,7 +58,7 @@ Além dos seis itens gerais do Caderno B2B, a equipe do **Alçadas** estabelece 
 | **Isolamento de Tenants (`RNF07`)** | Toda consulta à API deve garantir isolamento de dados entre empresas distintas, retornando `403` ou `404` em acessos cruzados. |
 | **Estados Visuais de Tela (`RNF08`)** | Toda tela ou componente da interface web Angular deve tratar explicitamente os três estados visuais: *Carregando (loading)*, *Vazio (empty)* e *Erro com retry (error)*. |
 | **Execução Local em Emuladores (`RNF10`)** | Todas as funcionalidades devem ser executáveis e testáveis localmente utilizando os emuladores do Firebase via `docker compose up`, com custo de nuvem zero em desenvolvimento. |
-| **Controle de Nuvem (`RNF06`)** | Nenhuma alteração pode introduzir recursos de nuvem que violem o teto orçamentário de US$ 50,00 na GCP. |
+| **Custo Zero (`RNF06`)** | Nenhuma alteração pode exigir conta de faturamento, plano Blaze ou forma de pagamento; testes pesados rodam só no emulador ([ADR-011](../arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md)). |
 
 ---
 

@@ -101,6 +101,7 @@ nav:
           - "ADR-008: Firestore deny-all": arquitetura/adrs/ADR-008-firestore-deny-all.md
           - "ADR-009: Contrato da API v0.2": arquitetura/adrs/ADR-009-contrato-api-v0-2.md
           - "ADR-010: Concorrência otimista (CP2)": arquitetura/adrs/ADR-010-concorrencia-otimista-rest.md
+          - "ADR-011: Plano Custo Zero (Render + Spark)": arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md
   - "API (OpenAPI)":
       - "Especificação OpenAPI v0.2": api/index.md
   - "Testes e QA":
@@ -108,7 +109,7 @@ nav:
   - Governança:
       - "Definition of Done (DoD)": governanca/dod.md
       - "Regras do Repositório": governanca/regras-repositorio.md
-      - "FinOps — Controle de Gastos": governanca/finops.md
       - "Matriz de Alçadas": governanca/matriz-alcadas.md
       - "Matriz RACI": governanca/matriz-raci.md
   - Rastreabilidade: rastreabilidade.md
+  - "FinOps — Custo Zero": finops/index.md
