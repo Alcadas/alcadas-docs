@@ -1,7 +1,7 @@
 # ADR-011: Plano Custo Zero — API no Render e Firebase no Plano Spark (sem voucher do GCP)
 
 ## Status
-**Aceito pela equipe** (Checkpoint 2) — **depende da aprovação do professor**, porque troca serviços que o Caderno B2B v2 define como obrigatórios.
+**Aceito pela equipe** (Checkpoint 2) — **aguardando o aval do professor**, porque troca serviços que o Caderno B2B v2 define como obrigatórios. O pedido e a resposta ficam registrados na seção [Aval do professor](#aval-do-professor).
 Substitui as partes de deploy, operação e orçamento que dependiam do GCP faturado. Mantém o [ADR-004](ADR-004-firestore-e-firebase-auth.md) (Firestore + Firebase Auth) e o [ADR-008](ADR-008-firestore-deny-all.md) (Security Rules deny-all).
 
 ## Data
@@ -68,7 +68,39 @@ O Alçadas adota o **Plano Custo Zero**. Para o nosso projeto só a base comum �
 - **Chave de serviço** pode vazar.
   *Mitigação:* papel mínimo, chave só em variável protegida, `gitleaks` no CI e troca imediata da chave em caso de suspeita.
 - **Uma instância só:** a concorrência otimista do [ADR-010](ADR-010-concorrencia-otimista-rest.md) continua necessária (reinícios e deploys).
-- **Exceções ao Caderno que precisam de aprovação do professor:** API fora do Cloud Run; CORS no lugar do rewrite de mesma origem; chave de serviço no lugar do Workload Identity; UptimeRobot no lugar do Cloud Monitoring. Se não forem aceitas, o Checkpoint 3 pode ser reprovado — a aprovação deve ser pedida e registrada até 01/11.
+- **Exceções ao Caderno que precisam de aprovação do professor:** API fora do Cloud Run; CORS no lugar do rewrite de mesma origem; chave de serviço no lugar do Workload Identity; UptimeRobot no lugar do Cloud Monitoring. Os alertas de erros `5xx` e de latência p95 do Caderno também ficam sem equivalente direto. Se não forem aceitas, o Checkpoint 3 pode ser reprovado.
+
+---
+
+## Aval do professor
+
+**Situação:** ⏳ **pendente** — nenhuma resposta registrada até 22/11/2026. O prazo original era 01/11 e o pedido é a primeira atividade do Checkpoint 3 (`alcadas-docs#19`).
+
+| # | Exceção ao Caderno | O que o Alçadas usa | Como o risco é coberto | Resposta |
+| :-: | :--- | :--- | :--- | :-: |
+| 1 | API no Cloud Run | Web service gratuito do **Render**, a partir do Dockerfile de produção (usuário não-root) | Health check do Render em `/api/healthz`; deploy só do que está na `main` | ⏳ |
+| 2 | Rewrite `/api/**` de mesma origem | Chamada direta para a URL do Render | **CORS só para `https://alcadas-app.web.app` e os canais de preview do site**; nenhuma outra origem em produção | ⏳ |
+| 3 | Workload Identity Federation | **Chave da conta de serviço** do Firebase Admin | Papel mínimo, chave só nos secrets do GitHub e nas variáveis do Render, `gitleaks` no CI, troca imediata em caso de suspeita | ⏳ |
+| 4 | Cloud Monitoring (uptime) | **UptimeRobot** em `/api/readyz`, checagem a cada 5 min e alerta por e-mail | `/readyz` responde `503` quando o Firestore está fora ou a credencial é inválida | ⏳ |
+| 5 | Alertas de `5xx` e de latência p95 > 1,5 s | Sem alerta automático gratuito equivalente | Ver a proposta abaixo | ⏳ |
+
+**Proposta para o item 5** (levar pronta, em vez de só perguntar):
+
+- **Erros `5xx`:** a API grava uma linha JSON por requisição, com `severity: "ERROR"` e o tipo da exceção em todo `5xx`, sem dados pessoais (`RNF09`). A indisponibilidade total já gera alerta pelo UptimeRobot (item 4). Os `5xx` pontuais são revisados no painel de logs do Render, filtrando por `"severity":"ERROR"`, na reunião de segunda-feira e antes de cada gate.
+- **Latência p95:** cada linha de log traz `duracaoMs`, o que permite calcular o p95 da semana a partir dos logs do Render. O UptimeRobot também registra o tempo de resposta de `/readyz`. O valor entra no relatório da sprint, sem alerta automático.
+- **Alternativa a avaliar com o professor:** trocar o UptimeRobot por outro monitor gratuito que também alerte por tempo de resposta (sugestões recebidas: Pulsetic ou Better Stack). A troca só é feita com o aval do professor e uma atualização desta ADR, e nunca com cartão cadastrado.
+
+**Registro da resposta** (preencher quando chegar):
+
+```markdown
+Data da resposta: dd/mm/2026
+Meio: e-mail / reunião / fórum (link ou print em docs/assets/images/aval-professor-adr-011.png, se a pessoa autorizar)
+Exceções aceitas: 1, 2, 3, 4
+Alertas de 5xx e p95: <decisão do professor>
+Condições ou ressalvas: <se houver>
+```
+
+Quando a resposta chegar, atualizar a coluna **Resposta** (✅ aceita · ❌ recusada), o **Status** no topo desta ADR e o [catálogo de ADRs](index.md).
 
 ---
 
