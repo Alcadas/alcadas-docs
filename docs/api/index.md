@@ -1,10 +1,13 @@
-# Especificação OpenAPI v0.2.0
+# Especificação OpenAPI v0.3.0
 
-Contrato da API REST do **Alçadas** no **Checkpoint 2** (núcleo funcional rodando localmente). O arquivo fonte, validado contra o schema oficial do OpenAPI 3.0, está em [`docs/api/openapi.yaml`](openapi.yaml). As convenções estão no [ADR-009](../arquitetura/adrs/ADR-009-contrato-api-v0-2.md).
+Contrato da API REST do **Alçadas** no **Checkpoint 3** (nuvem e integração). O arquivo fonte, validado contra o schema oficial do OpenAPI 3.0, está em [`docs/api/openapi.yaml`](openapi.yaml). As convenções estão no [ADR-009](../arquitetura/adrs/ADR-009-contrato-api-v0-2.md).
 
-- Todas as rotas usam o prefixo **`/api`** (ex.: `http://localhost:3000/api/solicitacoes`).
+- **Produção:** `https://alcadas-api.onrender.com/api` (web service gratuito do Render, [ADR-011](../arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md)). A API dorme após 15 min sem tráfego, então a primeira chamada pode levar cerca de 1 minuto.
+- **Local:** `http://localhost:3000/api` (docker compose + emuladores).
+- Todas as rotas usam o prefixo **`/api`**. Toda resposta traz o cabeçalho `X-Request-Id`, o mesmo da linha de log JSON da requisição.
+- **CORS:** em produção só `https://alcadas-app.web.app` e os canais de preview `https://alcadas-app--<canal>.web.app` são aceitos.
 - Todas exigem `Authorization: Bearer <token do Firebase Auth>`, **exceto** `/healthz` e `/readyz`.
-- O tenant e o papel vêm sempre do token. Nenhuma rota recebe `tenantId` na URL ou no corpo.
+- O tenant e o papel vêm sempre do token. A única rota com `tenantId` na URL é `PUT /saas/tenants/{tenantId}`, e ele é conferido contra o token.
 - A coluna **Situação** mostra o que já está no código: ✅ no `develop` · 🔍 em PR aberto · ⏳ previsto.
 
 ---
@@ -13,7 +16,8 @@ Contrato da API REST do **Alçadas** no **Checkpoint 2** (núcleo funcional roda
 
 | Versão | Data | Mudanças |
 | :--- | :--- | :--- |
-| **0.2.0** | 01/11/2026 | Jornada 1 (`/centros-custo`, `/alcadas/tetos`); `/healthz` e `/readyz` públicos; `versao` obrigatório nas decisões; respostas `403`/`404`/`409` detalhadas com códigos `TRANSICAO_INVALIDA` e `CONFLITO_VERSAO`; campo `motivo` na verificação da trilha; paginação limitada a 50; servidor fictício de produção removido; extensão `x-implementado`. |
+| **0.3.0** | 22/11/2026 | Servidor de produção no Render; rotas `GET /saas/tenants`, `PUT /saas/tenants/{tenantId}` e `POST /saas/tenants/sync` com RBAC (`alcadas-core#28`); `/healthz` devolve o SHA do commit publicado e `/readyz` documenta o `503 NAO_PRONTO` e o cache de 60 s (`alcadas-core#29`); `GET /solicitacoes/{id}` implementada (BUG-002, `alcadas-core#92`); cabeçalho `X-Request-Id` (`alcadas-core#35`); `x-implementado` atualizado para o que já está na `develop`; tetos N1/N2/N3 com `minimum: 0.01` no lugar de `exclusiveMinimum: true`, que o validador do teste de contrato (`jest-openapi`) recusava. |
+| 0.2.0 | 01/11/2026 | Jornada 1 (`/centros-custo`, `/alcadas/tetos`); `/healthz` e `/readyz` públicos; `versao` obrigatório nas decisões; respostas `403`/`404`/`409` detalhadas com códigos `TRANSICAO_INVALIDA` e `CONFLITO_VERSAO`; campo `motivo` na verificação da trilha; paginação limitada a 50; servidor fictício de produção removido; extensão `x-implementado`. |
 | 0.1.0 | 18/10/2026 | Contrato inicial do Checkpoint 1 (solicitações, decisão e trilha). |
 
 ---
@@ -22,25 +26,30 @@ Contrato da API REST do **Alçadas** no **Checkpoint 2** (núcleo funcional roda
 
 | Método | Endpoint | Responsabilidade | Papel | Sucesso | Erros | Situação |
 | :---: | :--- | :--- | :--- | :---: | :---: | :---: |
-| `GET` | `/healthz` | Processo no ar | Público | `200` | — | 🔍 |
-| `GET` | `/readyz` | API consegue falar com o Firestore | Público | `200` | `503` | 🔍 |
-| `POST` | `/centros-custo` | Cadastrar centro de custo (US-01) | `ADMIN` | `201` | `400`, `401`, `403`, `409` | 🔍 `#14` |
-| `GET` | `/centros-custo` | Listar centros de custo do tenant | Autenticado | `200` | `401` | 🔍 `#14` |
-| `PUT` | `/alcadas/tetos` | Configurar tetos N1, N2, N3 (CA-01.1) | `ADMIN` | `200` | `400`, `401`, `403`, `404` | 🔍 `#14` |
-| `GET` | `/alcadas/tetos` | Consultar tetos vigentes | Autenticado | `200` | `401` | 🔍 `#14` |
-| `POST` | `/solicitacoes` | Submeter pedido (US-02, T01) | `SOLICITANTE` | `201` | `400`, `401`, `403` | 🔍 `#18` |
-| `GET` | `/solicitacoes` | Listar com paginação (`page`, `limit ≤ 50`) | Autenticado | `200` | `400`, `401` | 🔍 `#18` |
-| `GET` | `/solicitacoes/{id}` | Detalhe da solicitação | Autenticado do tenant | `200` | `401`, `403`, `404` | ⏳ |
+| `GET` | `/healthz` | Processo no ar (+ SHA do commit) | Público | `200` | — | ✅ |
+| `GET` | `/readyz` | API consegue falar com o Firestore | Público | `200` | `503` | ✅ |
+| `POST` | `/centros-custo` | Cadastrar centro de custo (US-01) | `ADMIN` | `201` | `400`, `401`, `403`, `409` | ✅ |
+| `GET` | `/centros-custo` | Listar centros de custo do tenant | Autenticado | `200` | `401` | ✅ |
+| `PUT` | `/alcadas/tetos` | Configurar tetos N1, N2, N3 (CA-01.1) | `ADMIN` | `200` | `400`, `401`, `403`, `404` | ✅ |
+| `GET` | `/alcadas/tetos` | Consultar tetos vigentes | Autenticado | `200` | `401` | ✅ |
+| `POST` | `/solicitacoes` | Submeter pedido (US-02, T01) | `SOLICITANTE` | `201` | `400`, `401`, `403` | ✅ |
+| `GET` | `/solicitacoes` | Listar com paginação (`page`, `limit ≤ 50`) | Autenticado | `200` | `400`, `401` | ✅ |
+| `GET` | `/solicitacoes/{id}` | Detalhe da solicitação | Autenticado do tenant | `200` | `401`, `404` | ✅ |
 | `POST` | `/solicitacoes/{id}/aprovar` | Aprovar (T02) | Aprovadores | `200` | `400`, `401`, `403`, `404`, `409` | ✅ |
 | `POST` | `/solicitacoes/{id}/rejeitar` | Rejeitar com motivo ≥ 10 (T03) | Aprovadores | `200` | `400`, `401`, `403`, `404`, `409` | ✅ |
 | `POST` | `/solicitacoes/{id}/ajuste` | Pedir ajuste com motivo ≥ 10 (T04) | Aprovadores | `200` | `400`, `401`, `403`, `404`, `409` | ✅ |
-| `GET` | `/solicitacoes/{id}/trilha` | Elos SHA-256 da solicitação (US-07) | Aprovadores, `AUDITOR`, `ADMIN`, autor | `200` | `401`, `403`, `404` | 🔍 |
-| `POST` | `/solicitacoes/{id}/trilha/verificar` | Recalcular a cadeia e apontar adulteração (US-08) | Aprovadores, `AUDITOR`, `ADMIN`, autor | `200` | `401`, `403`, `404` | 🔍 |
-| `GET` | `/solicitacoes/{id}/trilha/exportar` | Exportar CSV/JSON (US-13) | `AUDITOR`, `ADMIN` | `200` | `401`, `403` | ⏳ CP3 |
+| `GET` | `/solicitacoes/{id}/trilha` | Elos SHA-256 da solicitação (US-07) | Aprovadores, `AUDITOR`, `ADMIN`, autor | `200` | `401`, `403`, `404` | ✅ |
+| `POST` | `/solicitacoes/{id}/trilha/verificar` | Recalcular a cadeia e apontar adulteração (US-08) | Aprovadores, `AUDITOR`, `ADMIN`, autor | `200` | `401`, `403`, `404` | ✅ |
+| `GET` | `/solicitacoes/{id}/trilha/exportar` | Exportar CSV/JSON (US-13) | `AUDITOR`, `ADMIN` | `200` | `401`, `403` | ⏳ CP4 |
+| `GET` | `/saas/tenants` | Listar todas as empresas clientes | `SUPER_USER` | `200` | `401`, `403` | ✅ |
+| `PUT` | `/saas/tenants/{tenantId}` | Criar/atualizar empresa e provisionar colaboradores no Firebase Auth | `SUPER_USER`; `ADMIN` só da própria empresa | `200` | `400`, `401`, `403`, `404` | ✅ |
+| `POST` | `/saas/tenants/sync` | Gravar várias empresas de uma vez | `SUPER_USER` | `200` | `400`, `401`, `403` | ✅ |
 
 **Aprovadores** = `USER_NORMAL`, `SUPER_USER`, `APROVADOR_N1`, `APROVADOR_N2`, `DIRETOR_CFO` (ver [ADR-007](../arquitetura/adrs/ADR-007-rbac-e-sod.md)). O papel libera a rota; o teto da alçada e o SoD são conferidos em seguida, no caso de uso.
 
-**Fora do contrato v0.2 (próximas versões):** reenvio após ajuste (`T05`) e cancelamento (`T06`), delegações (`RF04`/`US-10`).
+**Fora do contrato v0.3 (próximas versões):** reenvio após ajuste (`T05`) e cancelamento (`T06`), delegações (`RF04`/`US-10`).
+
+**Rotas que a API já expõe e ainda não estão no contrato:** `PUT /solicitacoes/{id}`, `POST /alcadas/tetos`, `POST /alcadas/validar-decisao`, `GET`/`PUT /organizacao/fluxos`, `DELETE /organizacao/fluxos/{id}` e as rotas legadas em inglês `tenants/{tenantId}/cost-centers` e `tenants/{tenantId}/tiers`. Elas usam payloads próprios do frontend e precisam ser descritas (ou removidas da API) antes da v1.0.
 
 ---
 
@@ -169,7 +178,45 @@ Grava a matriz de alçadas de um centro de custo. Teto vazio, zero ou negativo �
 
 ---
 
-## 3. Padrão Global de Erros
+### 2.7. Saúde em produção (`GET /healthz` e `GET /readyz`)
+`/healthz` não toca no banco e é o health check do Render; devolve o SHA do commit publicado. `/readyz` lê 1 documento do Firestore real e guarda o resultado saudável por 60 s, para gastar no máximo ~1.440 das 50 mil leituras diárias do plano Spark. É a rota monitorada pelo UptimeRobot.
+
+```bash
+curl -i https://alcadas-api.onrender.com/api/healthz   # 200 {"status":"ok","commit":"3f7c753…"}
+curl -i https://alcadas-api.onrender.com/api/readyz    # 200 {"status":"ok","firestore":"ok"}
+                                                      # 503 {"statusCode":503,"error":"NAO_PRONTO",…}
+```
+
+---
+
+### 2.8. Empresas clientes (`/saas/tenants`)
+Rotas da plataforma, com papel conferido no token verificado (o cabeçalho `x-user-role` é ignorado):
+
+| Rota | Sem token | Colaborador | `ADMIN` da empresa | `SUPER_USER` |
+| :--- | :---: | :---: | :---: | :---: |
+| `GET /saas/tenants` | 401 | 403 | 403 | 200 |
+| `POST /saas/tenants/sync` | 401 | 403 | 403 | 200 |
+| `PUT /saas/tenants/{tenantId}` (própria empresa) | 401 | 403 | 200 | 200 |
+| `PUT /saas/tenants/{tenantId}` (outra empresa) | 401 | 403 | 403 | 200 |
+
+Ao salvar, cada departamento vira centro de custo, a empresa ganha as faixas N1/N2/N3 se ainda não tiver nenhuma e os colaboradores são criados no Firebase Auth com as claims `tenantId` e `role`. O `ADMIN` não altera `plan`, `status`, `maxUsers` nem `createdAt`. Em produção a conta do colaborador nasce sem senha (o Firebase envia o e-mail de definição) e nenhuma senha é gravada ou devolvida.
+
+---
+
+## 3. Como conferir o contrato
+
+O `alcadas-core` valida as respostas reais da API contra este arquivo com `jest-openapi` (`apps/api-e2e/src/contrato/contrato-openapi.spec.ts`):
+
+```bash
+# no alcadas-core, com este openapi.yaml copiado para apps/api-e2e/contrato/openapi.yaml
+npx firebase-tools emulators:exec --project demo-alcadas --only auth,firestore   "npx nx e2e api-e2e --testFile=contrato-openapi.spec.ts"
+```
+
+Resultado com a v0.3.0 em 22/11/2026: **20 testes passaram** e 2 seguem como `todo` (rotas de checkpoints futuros). No CI deste repositório o arquivo também é validado com `swagger-cli validate`.
+
+---
+
+## 4. Padrão Global de Erros
 
 Todas as respostas de erro da API seguem a estrutura JSON padronizada:
 

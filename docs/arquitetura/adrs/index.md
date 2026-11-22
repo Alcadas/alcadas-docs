@@ -19,6 +19,7 @@ Este catálogo documenta os **Registros de Decisões de Arquitetura** (*Architec
 | [**ADR-009**](ADR-009-contrato-api-v0-2.md) | Convenções do contrato da API (OpenAPI v0.2.0) | **Aceito** | `RNF07`, todas as jornadas | 2026-11-01 |
 | [**ADR-010**](ADR-010-concorrencia-otimista-rest.md) | Concorrência otimista por precondição do Firestore (CP2) | **Aceito** (provisório) | `RF11` (`US-05`), `RF07` | 2026-11-01 |
 | [**ADR-011**](ADR-011-hospedagem-render-firebase-spark.md) | Plano Custo Zero: API no Render e Firebase no plano Spark (sem voucher do GCP) | **Aceito pela equipe** (aguarda aprovação do professor) | `RNF05`, `RNF06` | 2026-11-01 |
+| [**ADR-012**](ADR-012-contrato-api-v0-3-producao.md) | Contrato da API v0.3.0: produção no Render e rotas de plataforma (`saas/tenants`) | **Proposto** | `RF01`, `RNF07`, `RNF09` | — |
 
 ---
 
@@ -28,6 +29,12 @@ Este catálogo documenta os **Registros de Decisões de Arquitetura** (*Architec
 - **ADR-009** fixa as convenções do contrato (rotas em português sob `/api`, tenant sempre do token, uma rota por operação, `x-implementado`).
 - **ADR-010** registra como a concorrência otimista do ADR-005 foi implementada enquanto a API usa o Firestore via REST, e o plano de migração para `runTransaction()`.
 - **ADR-011** adota o Plano Custo Zero: sem conta de faturamento no GCP, frontend no Firebase Hosting, Auth e Firestore no Spark e API no Render. Lista as exceções ao Caderno que dependem da aprovação do professor.
+
+---
+
+## Decisões do Checkpoint 3
+
+- **ADR-012** atualiza o contrato para a v0.3.0: servidor de produção no Render, cabeçalho `X-Request-Id` e as rotas de plataforma `saas/tenants`, única exceção à regra do ADR-009 de nunca receber `tenantId` na URL.
 
 ---
 

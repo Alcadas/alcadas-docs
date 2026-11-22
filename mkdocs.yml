@@ -102,8 +102,9 @@ nav:
           - "ADR-009: Contrato da API v0.2": arquitetura/adrs/ADR-009-contrato-api-v0-2.md
           - "ADR-010: Concorrência otimista (CP2)": arquitetura/adrs/ADR-010-concorrencia-otimista-rest.md
           - "ADR-011: Plano Custo Zero (Render + Spark)": arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md
+          - "ADR-012: Contrato da API v0.3 (produção)": arquitetura/adrs/ADR-012-contrato-api-v0-3-producao.md
   - "API (OpenAPI)":
-      - "Especificação OpenAPI v0.2": api/index.md
+      - "Especificação OpenAPI v0.3": api/index.md
   - "Testes e QA":
       - "Estratégia de Testes": testes/estrategia_de_testes.md
   - Governança:

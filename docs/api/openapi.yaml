@@ -1,22 +1,29 @@
 openapi: 3.0.3
 info:
-  title: API Alçadas - Checkpoint 2
+  title: API Alçadas - Checkpoint 3
   description: >-
-    Contrato da API REST do sistema Alçadas no Checkpoint 2 (núcleo funcional local).
+    Contrato da API REST do sistema Alçadas no Checkpoint 3 (nuvem e integração).
     Cobre as jornadas 1 a 3 e 5 do MVP: configuração de centros de custo e tetos de alçada,
     submissão de solicitações, decisão do aprovador (aprovar, rejeitar, pedir ajuste) e
-    trilha de auditoria com verificação da cadeia SHA-256.
+    trilha de auditoria com verificação da cadeia SHA-256, além da administração das
+    empresas clientes (`saas/tenants`).
 
 
     Todas as rotas usam o prefixo `/api` e exigem `Authorization: Bearer <token do Firebase Auth>`,
-    exceto `/healthz` e `/readyz`. O tenant e o papel do usuário vêm do token, nunca da URL ou do corpo.
+    exceto `/healthz` e `/readyz`. O tenant e o papel do usuário vêm do token, nunca da URL ou do corpo;
+    a única exceção é `PUT /saas/tenants/{tenantId}`, em que o `tenantId` da URL é conferido contra o token.
+
+
+    Toda resposta traz o cabeçalho `X-Request-Id` (o mesmo valor da linha de log JSON da requisição).
+    Em produção a API roda no Render e é chamada direto pelo frontend no Firebase Hosting, com CORS
+    restrito ao domínio da equipe e aos seus canais de preview (ADR-011).
 
 
     A extensão `x-implementado` indica a situação de cada operação no código (`alcadas-core`):
     `true` = já está na branch `develop`; `em-revisao` = implementada em PR aberto;
     `false` = prevista para um checkpoint futuro. Histórico de versões em
-    `docs/api/index.md` e decisões em ADR-008 e ADR-009.
-  version: 0.2.0
+    `docs/api/index.md` e decisões em ADR-008, ADR-009 e ADR-011.
+  version: 0.3.0
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
@@ -25,8 +32,14 @@ info:
     url: https://github.com/Alcadas/alcadas-docs
 
 servers:
+  - url: https://alcadas-api.onrender.com/api
+    description: >-
+      Produção (web service gratuito do Render, serviço `alcadas-api` do `render.yaml`). Firestore e
+      Firebase Auth reais no plano Spark. Dorme após 15 min sem tráfego: a primeira chamada pode levar
+      cerca de 1 minuto (cold start). Origens aceitas pelo CORS: `https://alcadas-app.web.app` e os
+      canais de preview `https://alcadas-app--<canal>.web.app` (ADR-011).
   - url: http://localhost:3000/api
-    description: Desenvolvimento local (docker compose + emuladores Firebase). A API publicada fica no Render (Checkpoint 3) e é chamada direto pelo frontend no Firebase Hosting, com CORS restrito ao domínio da equipe (ADR-011).
+    description: Desenvolvimento local (docker compose + emuladores Firebase).
 
 tags:
   - name: Saúde
@@ -37,6 +50,8 @@ tags:
     description: Jornadas 2 e 3 — submissão e decisão (RF02, RF03, RF11 / US-02 a US-05).
   - name: Trilha
     description: Jornada 5 — trilha de auditoria SHA-256 (RF07 a RF09 / US-07, US-08, US-13).
+  - name: Plataforma
+    description: Administração das empresas clientes (tenants) e provisionamento dos colaboradores no Firebase Auth (RF01, RN01, RN02, RNF07).
 
 components:
   securitySchemes:
@@ -97,6 +112,10 @@ components:
             type: string
           example: [valor]
           description: Campos que falharam na validação (somente em respostas 400).
+        erros:
+          type: array
+          items: {}
+          description: Detalhes de validação devolvidos pela API em algumas respostas 400.
         timestamp:
           type: string
           format: date-time
@@ -407,21 +426,18 @@ components:
         N1:
           type: number
           format: double
-          exclusiveMinimum: true
-          minimum: 0
+          minimum: 0.01
           example: 1000.00
         N2:
           type: number
           format: double
-          exclusiveMinimum: true
-          minimum: 0
+          minimum: 0.01
           example: 5000.00
         N3:
           type: number
           format: double
           nullable: true
-          exclusiveMinimum: true
-          minimum: 0
+          minimum: 0.01
           example: null
 
     Saude:
@@ -434,6 +450,193 @@ components:
         firestore:
           type: string
           enum: [ok]
+          description: Presente só em `/readyz`.
+        commit:
+          type: string
+          example: 3f7c7535e2a1b4c9d8f0a6e2b1c3d4e5f6a7b8c9
+          description: >-
+            SHA do commit publicado, presente só em `/healthz` quando o ambiente informa
+            `RENDER_GIT_COMMIT` (Render) ou `COMMIT_SHA`.
+
+    Departamento:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          example: dep-financeiro
+        code:
+          type: string
+          example: FIN
+        name:
+          type: string
+          example: Financeiro
+        costCenter:
+          type: string
+          example: CC-FIN-01
+          description: Código do centro de custo gerado a partir do departamento.
+        monthlyBudget:
+          type: number
+          example: 100000
+        managerName:
+          type: string
+        color:
+          type: string
+          example: '#1565c0'
+
+    Colaborador:
+      type: object
+      required: [id, email, role]
+      description: >-
+        Colaborador da empresa. Ao salvar a empresa, cada colaborador é criado ou atualizado no
+        Firebase Auth com as claims `tenantId`, `role` e `roles`. Em produção a conta nasce sem senha
+        e o Firebase envia o e-mail de definição de senha.
+      properties:
+        id:
+          type: string
+          example: col-0001
+        employeeCode:
+          type: string
+        fullName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        jobTitle:
+          type: string
+        role:
+          type: string
+          example: SOLICITANTE
+        departmentId:
+          type: string
+        departmentName:
+          type: string
+        approvalLimit:
+          type: number
+          example: 15000
+        status:
+          type: string
+          example: ATIVO
+        joinedAt:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+          description: >-
+            Usado só no emulador. Em produção é descartado: não é gravado no Firestore nem devolvido.
+        profissaoId:
+          type: integer
+        isCompanyAdmin:
+          type: boolean
+
+    TenantSaas:
+      type: object
+      required: [tenantId]
+      description: >-
+        Cadastro de uma empresa cliente. `plan`, `status`, `maxUsers` e `createdAt` pertencem à
+        plataforma: quando quem salva é o `ADMIN` da empresa, esses campos são ignorados e os valores
+        já gravados são mantidos.
+      properties:
+        tenantId:
+          type: string
+          pattern: '^[A-Za-z0-9_-]+$'
+          example: startop
+        plan:
+          type: string
+          example: PRO
+        status:
+          type: string
+          example: ATIVO
+        createdAt:
+          type: string
+        maxUsers:
+          type: integer
+          example: 50
+        ownerName:
+          type: string
+        ownerEmail:
+          type: string
+          format: email
+        ownerRole:
+          type: string
+        organization:
+          type: object
+          properties:
+            cnpj:
+              type: string
+            legalName:
+              type: string
+            tradeName:
+              type: string
+            stateRegistration:
+              type: string
+            taxRegime:
+              type: string
+            corporateEmail:
+              type: string
+            corporatePhone:
+              type: string
+            website:
+              type: string
+            address:
+              type: object
+              additionalProperties:
+                type: string
+            departments:
+              type: array
+              items:
+                $ref: '#/components/schemas/Departamento'
+            employees:
+              type: array
+              items:
+                $ref: '#/components/schemas/Colaborador'
+            policies:
+              type: object
+        profissoes:
+          type: array
+          items:
+            type: object
+            required: [id, nome]
+            properties:
+              id:
+                type: integer
+              nome:
+                type: string
+              systemRole:
+                type: string
+              funcionalidades:
+                type: array
+                items:
+                  type: string
+
+    ListaTenantsSaas:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantSaas'
+
+    SincronizarTenantsDto:
+      type: object
+      required: [tenants]
+      properties:
+        tenants:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantSaas'
+
+    SincronizarTenantsResponse:
+      type: object
+      required: [synced]
+      properties:
+        synced:
+          type: integer
+          example: 3
+          description: Quantidade de empresas gravadas (itens sem `tenantId` são ignorados).
 
     VerificacaoTrilhaResponseDto:
       type: object
@@ -481,10 +684,12 @@ paths:
   /healthz:
     get:
       summary: Liveness
-      description: Indica que o processo da API está de pé. Não consulta o banco. É o health check do Render (ADR-011).
+      description: >-
+        Indica que o processo da API está de pé. Não consulta o banco, então não gasta cota do
+        Firestore. É o health check do Render (ADR-011) e devolve o SHA do commit publicado.
       operationId: healthz
       tags: [Saúde]
-      x-implementado: em-revisao
+      x-implementado: true
       security: []
       responses:
         '200':
@@ -493,14 +698,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Saude'
+              example:
+                status: ok
+                commit: 3f7c7535e2a1b4c9d8f0a6e2b1c3d4e5f6a7b8c9
 
   /readyz:
     get:
       summary: Readiness
-      description: Indica que a API consegue falar com o Firestore. Monitorado pelo UptimeRobot no ambiente publicado (ADR-011).
+      description: >-
+        Indica que a API consegue falar com o Firestore. Em produção lê 1 documento do Firestore real
+        e reaproveita o resultado saudável por 60 s (no máximo ~1.440 leituras por dia frente às 50 mil
+        do plano Spark); falhas não são reaproveitadas. Monitorado pelo UptimeRobot (ADR-011).
       operationId: readyz
       tags: [Saúde]
-      x-implementado: em-revisao
+      x-implementado: true
       security: []
       responses:
         '200':
@@ -509,12 +720,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Saude'
+              example:
+                status: ok
+                firestore: ok
         '503':
-          description: Firestore indisponível.
+          description: Firestore indisponível ou credencial ausente/inválida (`error` = `NAO_PRONTO`).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              example:
+                statusCode: 503
+                error: NAO_PRONTO
+                message: Firestore indisponível.
+                timestamp: '2026-11-15T12:00:00.000Z'
 
   /centros-custo:
     post:
@@ -522,7 +741,7 @@ paths:
       description: Cria um centro de custo no tenant do usuário. Somente ADMIN (US-01).
       operationId: criarCentroCusto
       tags: [Configuração]
-      x-implementado: em-revisao
+      x-implementado: true
       requestBody:
         required: true
         content:
@@ -565,7 +784,7 @@ paths:
       description: Lista os centros de custo do tenant do usuário.
       operationId: listarCentrosCusto
       tags: [Configuração]
-      x-implementado: em-revisao
+      x-implementado: true
       responses:
         '200':
           description: Centros de custo do tenant.
@@ -590,7 +809,7 @@ paths:
         Exemplo da Startop: N1 = 1000.00, N2 = 5000.00, N3 = null (sem limite).
       operationId: configurarTetos
       tags: [Configuração]
-      x-implementado: em-revisao
+      x-implementado: true
       requestBody:
         required: true
         content:
@@ -635,7 +854,7 @@ paths:
       description: Retorna os tetos do centro de custo (ou o padrão do tenant quando não houver específico).
       operationId: consultarTetos
       tags: [Configuração]
-      x-implementado: em-revisao
+      x-implementado: true
       parameters:
         - name: centroCustoId
           in: query
@@ -664,7 +883,7 @@ paths:
       description: Submete um novo pedido de compra, pagamento ou reembolso, gerando o elo Log 1 na trilha.
       operationId: criarSolicitacao
       tags: [Solicitações]
-      x-implementado: em-revisao
+      x-implementado: true
       requestBody:
         required: true
         content:
@@ -704,7 +923,7 @@ paths:
         `GET /solicitacoes?page=2&limit=20` devolve os itens 21 a 40.
       operationId: listarSolicitacoes
       tags: [Solicitações]
-      x-implementado: em-revisao
+      x-implementado: true
       parameters:
         - name: status
           in: query
@@ -753,10 +972,10 @@ paths:
   /solicitacoes/{id}:
     get:
       summary: Consultar detalhes da solicitação
-      description: Retorna os dados completos da solicitação. Aplica isolamento de tenant rigoroso (retorna 403 ou 404 em acessos cruzados).
+      description: Retorna os dados completos da solicitação. A busca é feita só dentro do tenant do token, então uma solicitação de outra empresa responde 404 (RNF07). Corrigido no BUG-002 (alcadas-core#92).
       operationId: obterSolicitacaoPorId
       tags: [Solicitações]
-      x-implementado: false
+      x-implementado: true
       parameters:
         - name: id
           in: path
@@ -973,7 +1192,7 @@ paths:
         solicitação do tenant; SOLICITANTE só a do próprio pedido. Não existe rota de alteração ou exclusão de elos.
       operationId: obterTrilhaAuditoria
       tags: [Trilha]
-      x-implementado: em-revisao
+      x-implementado: true
       parameters:
         - name: id
           in: path
@@ -1016,7 +1235,7 @@ paths:
         Para cadeias de até 1.000 elos deve responder em menos de 1 s. Mesmas regras de acesso de GET /trilha.
       operationId: verificarIntegridadeTrilha
       tags: [Trilha]
-      x-implementado: em-revisao
+      x-implementado: true
       parameters:
         - name: id
           in: path
@@ -1081,6 +1300,135 @@ paths:
                 type: string
         '401':
           description: Não autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /saas/tenants:
+    get:
+      summary: Listar empresas clientes
+      description: >-
+        Lista todas as empresas (tenants) cadastradas na plataforma. Como a resposta traz dados de
+        todas as empresas, é exclusiva do `SUPER_USER`. Lê a coleção inteira `saas_tenants`
+        (uma leitura do Firestore por empresa).
+      operationId: listarTenantsSaas
+      tags: [Plataforma]
+      x-implementado: true
+      responses:
+        '200':
+          description: Empresas cadastradas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListaTenantsSaas'
+        '401':
+          description: Sem token ou token inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Papel diferente de `SUPER_USER` (inclusive o `ADMIN` de uma empresa).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /saas/tenants/{tenantId}:
+    put:
+      summary: Criar ou atualizar empresa cliente
+      description: >-
+        Grava o cadastro da empresa, sincroniza cada departamento como centro de custo, cria as faixas
+        N1/N2/N3 quando a empresa ainda não tem nenhuma e provisiona os colaboradores no Firebase Auth
+        em segundo plano. O `SUPER_USER` altera qualquer empresa; o `ADMIN` só a própria, que precisa já
+        existir, e não altera `plan`, `status`, `maxUsers` nem `createdAt`. Em produção nenhuma senha de
+        colaborador é gravada nem devolvida.
+      operationId: salvarTenantSaas
+      tags: [Plataforma]
+      x-implementado: true
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^[A-Za-z0-9_-]+$'
+          description: Identificador da empresa. `platform-saas` é reservado.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantSaas'
+      responses:
+        '200':
+          description: Empresa gravada (sem senhas em produção).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantSaas'
+        '400':
+          description: '`tenantId` vazio, fora do formato permitido ou reservado (`platform-saas`).'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Sem token ou token inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Papel sem permissão ou `ADMIN` tentando alterar outra empresa.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: '`ADMIN` tentando salvar uma empresa que ainda não existe na plataforma.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /saas/tenants/sync:
+    post:
+      summary: Sincronizar empresas em lote
+      description: >-
+        Aplica `PUT /saas/tenants/{tenantId}` a cada empresa da lista (seed inicial ou sincronização
+        completa). Exclusivo do `SUPER_USER`.
+      operationId: sincronizarTenantsSaas
+      tags: [Plataforma]
+      x-implementado: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SincronizarTenantsDto'
+      responses:
+        '200':
+          description: Quantidade de empresas gravadas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SincronizarTenantsResponse'
+        '400':
+          description: Algum `tenantId` da lista é inválido ou reservado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Sem token ou token inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Papel diferente de `SUPER_USER`.
           content:
             application/json:
               schema:
