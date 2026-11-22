@@ -36,7 +36,7 @@ Para que qualquer *Pull Request (PR)* ou item do backlog seja dado como *Pronto 
 - **Comando de validação local:** `npm run lint` e `npm run format:check`.
 
 ### 5. Documentação Técnica Atualizada
-- Qualquer nova rota ou alteração de contrato foi refletida na especificação [OpenAPI v0.1](../api/index.md) (`docs/api/openapi.yaml`);
+- Qualquer nova rota ou alteração de contrato foi refletida na [especificação OpenAPI](../api/index.md) (`docs/api/openapi.yaml`), com `info.version` e histórico atualizados ([ADR-009](../arquitetura/adrs/ADR-009-contrato-api-v0-2.md));
 - Novas decisões arquiteturais ou mudanças em persistência/segurança possuem o respectivo [ADR](../arquitetura/adrs/index.md) documentado;
 - **Nenhum serviço ou recurso novo** (Firebase, Render ou qualquer outro) é ativado sem ADR ou aprovação registrada do Tech Lead no PR, e **nunca com cartão cadastrado** ([FinOps](../finops/index.md));
 - O `README.md` e os guias de contribuição estão atualizados com eventuais novos comandos ou dependências.
@@ -59,6 +59,8 @@ Além dos seis itens gerais do Caderno B2B, a equipe do **Alçadas** estabelece 
 | **Estados Visuais de Tela (`RNF08`)** | Toda tela ou componente da interface web Angular deve tratar explicitamente os três estados visuais: *Carregando (loading)*, *Vazio (empty)* e *Erro com retry (error)*. |
 | **Execução Local em Emuladores (`RNF10`)** | Todas as funcionalidades devem ser executáveis e testáveis localmente utilizando os emuladores do Firebase via `docker compose up`, com custo de nuvem zero em desenvolvimento. |
 | **Custo Zero (`RNF06`)** | Nenhuma alteração pode exigir conta de faturamento, plano Blaze ou forma de pagamento; testes pesados rodam só no emulador ([ADR-011](../arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md)). |
+| **Deploy no Plano Custo Zero** | Mudança que afeta produção passa pelo caminho da ADR-011: front com canal de preview no PR, API publicada pelo Render no merge da `main` só depois do CI verde, CORS restrito ao domínio da equipe e nenhum segredo fora dos secrets do GitHub e das variáveis do Render. |
+| **Cotas do Firestore** | Toda nova listagem é paginada (`limit` ≤ 50) e filtrada por `tenantId`; leitura de coleção inteira só com justificativa registrada em [FinOps](../finops/index.md). |
 
 ---
 

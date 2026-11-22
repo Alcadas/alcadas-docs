@@ -51,13 +51,16 @@ flowchart LR
 
 ## 2. Visão Geral das Sprints e Checkpoints Oficiais
 
-| Sprint / Período | Semanas | Gate Oficial B2B | Data Limite | Objetivo Principal | Meta FinOps (GCP) | Entregáveis Críticos |
+> [!NOTE] Plano Custo Zero
+> Desde o Checkpoint 2 o projeto segue o **Plano Custo Zero — sem o voucher do GCP** ([ADR-011](../arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md)): frontend no **Firebase Hosting**, login e banco no **Firebase Auth + Firestore (plano Spark)** e API no **Render** (web service gratuito). Não há conta de faturamento, então a meta é **US$ 0,00 em todos os checkpoints**; os tetos do Caderno (US$ 5, 12, 40 e 50) ficam só como referência. As exceções ao Caderno dependem do aval do professor, registrado na própria ADR-011.
+
+| Sprint / Período | Semanas | Gate Oficial B2B | Data Limite | Objetivo Principal | Meta FinOps (Custo Zero) | Entregáveis Críticos |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Sprint 1**<br>05/10 a 18/10/2026 | S1 e S2 | **Checkpoint 1 — Fundação** | **18/10/2026** | Validar problema, escopo, arquitetura e ambiente local. | US$ 0,00 acumulado<br>*(100% emuladores)* | Visão do Produto, Ishikawa, Backlog MoSCoW, 7 ADRs, OpenAPI v0.1, DoD, Estratégia de Testes, Monorepo Nx, Docker Compose com emuladores. |
-| **Sprint 2**<br>19/10 a 01/11/2026 | S3 e S4 | **Checkpoint 2 — Núcleo Funcional** | **01/11/2026** | Validar o fluxo ponta a ponta das jornadas do MVP rodando localmente. | Gasto acumulado **≤ US$ 5,00** | 3 a 5 jornadas funcionais locais, formulários reativos, máquina de estados atômica, anti-fracionamento, Security Rules *deny-all*, testes EP/BVA v1. |
-| **Sprint 3**<br>02/11 a 15/11/2026 | S5 e S6 | **Checkpoint 3 — Nuvem e Integração** | **15/11/2026** | Validar publicação em nuvem, observabilidade e infraestrutura segura. | Gasto acumulado **≤ US$ 12,00** | Deploy no Firebase Hosting + Cloud Run, rewrite `/api`, `/healthz`, `/readyz`, logs JSON estruturados, Workload Identity Federation (sem chaves JSON). |
-| **Sprint 4**<br>16/11 a 29/11/2026 | S7 e S8 | **Checkpoint 4 — Qualidade e Estabilização** | **29/11/2026** | Congelamento de escopo (*feature freeze*), confiabilidade e ensaio de contingência. | Teto preventivo em **US$ 40,00** *(Trigger de corte)* | Cobertura ≥80% domínio / ≥60% global, zero bugs críticos, zero vulnerabilidade alta/crítica, Lighthouse ≥90, rollback ensaiado, exportação Firestore. |
-| **Sprint 5**<br>30/11 a 05/12/2026 | S9 | **Checkpoint Final — Demo Day** | **05/12/2026** | Homologação final, validação da defensibilidade e apresentação do produto. | Teto orçamentário **≤ US$ 50,00** | Produção estável, smoke test pós-deploy verde, demonstração ao vivo da defensibilidade (< 1 s em anti-fracionamento e quebra de hash SHA-256). |
+| **Sprint 1**<br>05/10 a 18/10/2026 | S1 e S2 | **Checkpoint 1 — Fundação** | **18/10/2026** | Validar problema, escopo, arquitetura e ambiente local. | US$ 0,00<br>*(100% emuladores)* | Visão do Produto, Ishikawa, Backlog MoSCoW, 7 ADRs, OpenAPI v0.1, DoD, Estratégia de Testes, Monorepo Nx, Docker Compose com emuladores. |
+| **Sprint 2**<br>19/10 a 01/11/2026 | S3 e S4 | **Checkpoint 2 — Núcleo Funcional** | **01/11/2026** | Validar o fluxo ponta a ponta das jornadas do MVP rodando localmente. | US$ 0,00 + decisão em ADR<br>*(Caderno: ≤ US$ 5)* | 3 a 5 jornadas funcionais locais, formulários reativos, máquina de estados atômica, anti-fracionamento, Security Rules *deny-all*, testes EP/BVA v1, OpenAPI v0.2, ADR-011. |
+| **Sprint 3**<br>02/11 a 15/11/2026 | S5 e S6 | **Checkpoint 3 — Nuvem e Integração** | **15/11/2026** | Validar publicação em nuvem, observabilidade e infraestrutura segura. | US$ 0,00 + uso das cotas do Firestore<br>*(Caderno: ≤ US$ 12)* | Front no Firebase Hosting com preview no PR, API no Render com CORS restrito ao domínio da equipe, `/healthz` e `/readyz`, logs JSON com `requestId`, chave de serviço com papel mínimo + `gitleaks` no CI, UptimeRobot em `/api/readyz`. |
+| **Sprint 4**<br>16/11 a 29/11/2026 | S7 e S8 | **Checkpoint 4 — Qualidade e Estabilização** | **29/11/2026** | Congelamento de escopo (*feature freeze*), confiabilidade e ensaio de contingência. | US$ 0,00 + auditoria das cotas<br>*(Caderno: alerta em US$ 40)* | Cobertura ≥80% domínio / ≥60% global, zero bugs críticos, zero vulnerabilidade alta/crítica, Lighthouse ≥90, rollback ensaiado no Render e no Hosting, exportação Firestore. |
+| **Sprint 5**<br>30/11 a 05/12/2026 | S9 | **Checkpoint Final — Demo Day** | **05/12/2026** | Homologação final, validação da defensibilidade e apresentação do produto. | US$ 0,00 no ciclo inteiro<br>*(Caderno: ≤ US$ 50)* | Produção estável, API acordada antes da demo (cold start do Render), smoke test pós-deploy verde, demonstração ao vivo da defensibilidade (< 1 s em anti-fracionamento e quebra de hash SHA-256). |
 
 ---
 
@@ -76,7 +79,7 @@ flowchart LR
   - Revisão da [Estratégia de Testes](../testes/estrategia_de_testes.md) e do [Definition of Done](../governanca/dod.md);
   - Redação das ADRs fundamentais ([ADR-001](../arquitetura/adrs/ADR-001-monorepo-nx.md) a [ADR-007](../arquitetura/adrs/ADR-007-rbac-e-sod.md)) e especificação [OpenAPI v0.1](../api/index.md).
 - **Entrega Oficial — Checkpoint 1 (Domingo, 18/10/2026):**
-  - **Evidências auditadas:** Repositório configurado; CI com lint e build verdes; seed de dados reproduzível; 0 segredos expostos (`.env.example` sanitizado); alertas de billing na GCP em 50%, 80% e 100%.
+  - **Evidências auditadas:** Repositório configurado; CI com lint e build verdes; seed de dados reproduzível; 0 segredos expostos (`.env.example` sanitizado). Os alertas de orçamento do GCP em 50%, 80% e 100% previstos no Caderno foram substituídos, a partir do CP2, pelo print de cada serviço no plano gratuito, sem forma de pagamento ([FinOps](../finops/index.md)).
 
 ---
 
@@ -95,7 +98,7 @@ flowchart LR
 - **Reunião 4 (Segunda-feira, 26/10/2026) — Acompanhamento S4 & Preparação do Gate 2:**
   - Checagem dos testes de autorização e Security Rules *deny-all* no Firestore;
   - Validação dos estados visuais de tela (*loading*, *empty*, *error* conforme `RNF08`);
-  - Verificação de consumo FinOps local (custo GCP acumulado < US$ 5,00).
+  - Verificação de FinOps: gasto US$ 0,00 e registro do Plano Custo Zero na [ADR-011](../arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md) (o Caderno permitiria até US$ 5,00).
 - **Entrega Oficial — Checkpoint 2 (Domingo, 01/11/2026):**
   - **Evidências auditadas:** Demonstração da jornada completa localmente sem intervenção manual; suíte EP/BVA v1 executando; matriz de rastreabilidade Requisito $\to$ Aceite $\to$ Teste atualizada; bloqueio efetivo de tentativas de autoaprovação (*SoD* - `RF12`).
 
@@ -105,14 +108,16 @@ flowchart LR
 *Foco: Deploy contínuo em ambiente de homologação/produção, métricas operacionais e segurança de infraestrutura.*
 
 - **Reunião 5 (Segunda-feira, 02/11/2026) — Planejamento da Sprint 3 & Review do Gate 2:**
-  - Planejamento do pipeline de entrega contínua para **Firebase Hosting** (Frontend Angular) e **Google Cloud Run** (Backend NestJS);
-  - Implementação de autenticação via **Workload Identity Federation (WIF)** no GitHub Actions, eliminando credenciais de serviço permanentes;
-  - Configuração do rewrite `/api` para roteamento unificado sob o mesmo domínio.
+  - Pedido de aval do professor para as exceções da [ADR-011](../arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md) — **primeira atividade do checkpoint**;
+  - Planejamento do pipeline de entrega contínua: **Firebase Hosting** (Frontend Angular) com canal de preview em cada PR e **Render** (Backend NestJS) com deploy automático no merge da `main` após CI verde;
+  - Publicação da API a partir do Dockerfile de produção (usuário não-root) no web service gratuito do Render;
+  - Chamada direta do front para a URL do Render, com **CORS liberado só para o domínio `.web.app`/`.firebaseapp.com` da equipe** e seus canais de preview (substitui o rewrite `/api` de mesma origem);
+  - Credencial da API: **chave da conta de serviço do Firebase Admin com papel mínimo**, guardada só nos secrets do GitHub e nas variáveis do Render, com `gitleaks` no CI (substitui o Workload Identity Federation).
 - **Reunião 6 (Segunda-feira, 09/11/2026) — Acompanhamento S6 & Preparação do Gate 3:**
-  - Implementação dos endpoints de sondagem operacional `/healthz` e `/readyz`;
-  - Padronização de logs estruturados em formato JSON com `requestId`, `rota`, `status`, `latência` e ausência de dados PII (`RNF09`);
-  - Configuração de alertas para erros `5xx` e degradação de latência ($p95 > 1{,}5\text{ s}$);
-  - Auditoria de FinOps: checagem de leitura/escrita no Firestore e conferência do gasto acumulado ($\le \text{US\$} 12{,}00$).
+  - Implementação dos endpoints de sondagem operacional `/healthz` (processo vivo, usado pelo health check do Render) e `/readyz` (Firestore acessível);
+  - Padronização de logs estruturados em formato JSON com `requestId`, `rota`, `status`, `latência` e ausência de dados PII (`RNF09`), lidos no painel de logs do Render;
+  - Monitoramento externo com **UptimeRobot em `/api/readyz`** e alerta por e-mail (substitui o Cloud Monitoring). Os alertas de erros `5xx` e de latência ($p95 > 1{,}5\text{ s}$) do Caderno não têm equivalente gratuito e seguem a decisão registrada na ADR-011;
+  - Auditoria de FinOps: [leituras e escritas do Firestore por jornada](../finops/index.md) frente às cotas do Spark (50 mil leituras e 20 mil escritas por dia) e conferência do gasto (US$ 0,00).
 - **Entrega Oficial — Checkpoint 3 (Domingo, 15/11/2026):**
   - **Evidências auditadas:** Usuário externo acessa a URL de homologação, efetua login via Firebase Auth, cria uma solicitação e a decisão é refletida em tempo real sem erros de CORS ou dependência de ambiente local.
 
@@ -126,10 +131,10 @@ flowchart LR
   - Reforço da suíte de testes de integração e ponta a ponta (`US-08` — detecção de registros adulterados em menos de 1 s);
   - Testes das histórias do grupo **Should**: delegação temporária (`US-10`), resolução de ajustes (`US-11`), duplicidade (`US-12`) e exportação CSV/JSON (`US-13`).
 - **Reunião 8 (Segunda-feira, 23/11/2026) — Acompanhamento S8 & Ensaio de Contingência:**
-  - Execução e registro do **ensaio de rollback** em produção/staging;
+  - Execução e registro do **ensaio de rollback** em produção: deploy anterior no painel do Render e versão anterior no histórico do Firebase Hosting;
   - Teste de exportação manual e restauração da base Firestore;
   - Varredura de segurança contra vulnerabilidades (Dependabot, SAST, auditoria de imagens Docker com digest SHA);
-  - Auditoria de performance Lighthouse ($> 90$ em Desktop/Mobile) e conferência do gatilho de segurança orçamentária (limite preventivo de US$ 40,00).
+  - Auditoria de performance Lighthouse ($> 90$ em Desktop/Mobile) e auditoria das cotas gratuitas usadas (Firestore, Hosting, Render e GitHub Actions), no lugar do limite preventivo de US$ 40,00 do Caderno.
 - **Entrega Oficial — Checkpoint 4 (Domingo, 29/11/2026):**
   - **Evidências auditadas:** Cobertura de testes $\ge 80\%$ no domínio e $\ge 60\%$ global; zero vulnerabilidades críticas/altas; pipeline bloqueante em caso de falha; relatório de qualidade publicado em `/docs/testes`.
 
@@ -147,7 +152,7 @@ flowchart LR
     5. **Evidências de Engenharia:** Métricas de cobertura, observabilidade, conformidade com a LGPD e relatório final de custos FinOps.
 - **Quarta a Sexta-feira (02 a 04/12/2026):**
   - Rodadas de *dry run* (testes cegos de apresentação) com tempo cronometrado;
-  - Verificação de estabilidade dos endpoints `/healthz` e `/readyz` em produção;
+  - Verificação de estabilidade dos endpoints `/healthz` e `/readyz` em produção, acordando a API no Render 5 minutos antes de cada ensaio (cold start de ~1 minuto);
   - Preparação da massa de dados limpa e controlada (*seed* oficial da demo).
 - **Checkpoint Final — Demo Day (Sábado, 05/12/2026):**
   - **Apresentação oficial e homologação do MVP Alçadas perante a banca examinadora e stakeholders.**
@@ -164,22 +169,22 @@ Todas as reuniões de segunda-feira seguem estritamente a pauta de 20 a 30 minut
 | **2** | **O que está bloqueado?** | Impedimento registrado formalmente, com impacto nas histórias e indicação de responsável pela tratativa. | Toda a equipe / PO |
 | **3** | **Qual critério foi coberto?** | Caso de teste automatizado implementado vinculado aos critérios de aceite da User Story. | QA Lead (Leticia) |
 | **4** | **Qual risco aumentou?** | Registro atualizado na matriz de riscos, novo ADR elaborado ou plano de contingência acionado. | Tech Lead (Henrique) / PO (Matheus) |
-| **5** | **Quanto já gastamos?** | Consulta ao painel do GCP Billing, comparativo com a curva esperada da sprint e saldo restante dos US$ 50,00. | DevOps (Pedro Henrique) |
+| **5** | **Quanto já gastamos?** | Confirmação de que nenhum serviço tem forma de pagamento (gasto US$ 0,00) e leitura do uso das cotas gratuitas: Firestore, Hosting, horas do Render e minutos do GitHub Actions ([FinOps](../finops/index.md)). | DevOps (Pedro Henrique) |
 | **6** | **O que será feito na próxima semana?** | Histórias priorizadas da sprint com responsáveis explícitos e critérios de pronto (*DoD*) revisados. | PO (Matheus) / Time de Desenvolvimento |
 | **7** | **O que precisa de tutor/cliente?** | Dúvida técnica ou de negócio sintetizada de forma objetiva, com contexto e prazo limite para decisão. | PO em alinhamento com Julia Campos Santana |
 
 ---
 
-## 5. Curva de Gastos FinOps (Teto Orçamentário GCP: US$ 50,00)
+## 5. Curva de Gastos FinOps (Plano Custo Zero)
 
-O controle orçamentário é parte integrante dos critérios de avaliação do projeto, operando com alertas e gatilhos de corte:
+No plano Spark e no web service gratuito do Render **não existe cobrança possível**: quando um limite gratuito estoura, o serviço para até o dia (ou o mês) seguinte. Por isso o controle deixa de ser uma curva de gasto e passa a ser o **acompanhamento das cotas**, com a meta de US$ 0,00 em todas as etapas ([ADR-011](../arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md)):
 
 ```mermaid
 flowchart TD
-    G1["S1-S2: Emuladores Locais\nGasto: US$ 0,00"] --> G2["S3-S4: Testes Locais e Seeds\nTeto acumulado: US$ 5,00"]
-    G2 --> G3["S5-S6: Deploy Cloud Run + Firestore\nTeto acumulado: US$ 12,00"]
-    G3 --> G4["S7-S8: Carga e Estabilização\nTeto de alerta: US$ 40,00"]
-    G4 --> G5["S9: Demo Day em Produção\nTeto final inegociável: US$ 50,00"]
+    G1["S1-S2: Emuladores Locais\nGasto: US$ 0,00"] --> G2["S3-S4: Testes Locais e Seeds\nGasto: US$ 0,00 · ADR-011"]
+    G2 --> G3["S5-S6: Hosting + Render + Firestore Spark\nGasto: US$ 0,00 · cotas do Firestore"]
+    G3 --> G4["S7-S8: Carga só no emulador\nGasto: US$ 0,00 · auditoria das cotas"]
+    G4 --> G5["S9: Demo Day em Produção\nGasto: US$ 0,00 · API acordada antes"]
 
     style G1 fill:#e8f5e9,stroke:#2e7d32
     style G2 fill:#e8f5e9,stroke:#2e7d32
@@ -188,9 +193,11 @@ flowchart TD
     style G5 fill:#fbe9e7,stroke:#c62828
 ```
 
-- **Alerta 1 (50% do orçamento — US$ 25,00):** Notificação automática via Cloud Monitoring para o Tech Lead e DevOps;
-- **Alerta 2 (80% do orçamento — US$ 40,00):** Acionamento do protocolo de contingência: redução imediata de instâncias no Cloud Run (`min-instances=0`, `max-instances=2`), desligamento de jobs do Cloud Scheduler não essenciais e suspensão de testes de carga pesados na nuvem;
-- **Alerta 3 (100% do orçamento — US$ 50,00):** Travamento total de escalabilidade e contenção de custos para evitar gastos excedentes.
+Os alertas de orçamento em 50%, 80% e 100% do Caderno dependem de conta de faturamento e não existem no Spark. No lugar deles:
+
+- **Prova de custo zero:** print de cada serviço no plano gratuito, sem forma de pagamento, salvo em [`/docs/finops`](../finops/index.md) a cada checkpoint;
+- **Cotas que podem parar o sistema:** Firestore (50 mil leituras e 20 mil escritas por dia), Render (750 horas por mês) e Hosting (360 MB transferidos por dia), acompanhadas na reunião de segunda-feira;
+- **Contenção:** testes de carga, testes automatizados e seed grande rodam só no emulador; se uma cota estourar, o incidente é registrado em `docs/finops/incidente-<data>.md`.
 
 ---
 

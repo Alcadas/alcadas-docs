@@ -139,7 +139,7 @@ O **Alçadas** posiciona-se como uma plataforma central de governança: leve, fo
     - **Até a Semana 2:** Estruturação, contratos e ambiente local;
     - **Até a Semana 4:** Jornadas principais, máquina de estados e regras de segurança;
     - **Até a Semana 6 e Demo Day:** Deploy em nuvem, observabilidade e validação final.
-- **Viabilidade Financeira:** O projeto respeita rigorosamente o teto orçamentário de **US$ 50,00 por equipe** estabelecido para o ciclo na Google Cloud Platform (GCP). Como o desenvolvimento e os testes automatizados até a Semana 4 rodam integralmente em emuladores locais gratuitos (mantendo o gasto inicial abaixo de US$ 5,00), o custo total estimado de operação do Alçadas em nuvem situa-se entre **US$ 4,00 e US$ 10,00**, demonstrando excelente sustentabilidade financeira e aderência ao modelo de negócio da Startop LTDA.
+- **Viabilidade Financeira:** O Caderno fixa um teto de **US$ 50,00 por equipe** na Google Cloud Platform (GCP). Sem o voucher do GCP, o Alçadas adotou o **Plano Custo Zero** ([ADR-011](../arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md)): frontend no Firebase Hosting, login e banco no Firebase Auth e no Firestore (plano Spark) e API no web service gratuito do Render, sem forma de pagamento cadastrada em nenhum serviço. O desenvolvimento e os testes automatizados rodam em emuladores locais, e a meta é **US$ 0,00 em todo o ciclo** — o risco deixa de ser cobrança e passa a ser o estouro de uma cota diária, acompanhado em [FinOps](../finops/index.md).
 
 ---
 

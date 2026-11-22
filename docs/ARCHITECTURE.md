@@ -114,7 +114,7 @@ flowchart LR
 ## 5. Conformidade com a LGPD, Observabilidade e Custos em Nuvem
 
 - **Privacidade e LGPD (`RNF04`, `RNF09`):** Coleta estrita de dados corporativos necessários à trilha legal (nome completo, e-mail institucional, cargo/papel, ID de usuário e endereço IP de origem), com retenção de **5 anos após o encerramento do exercício fiscal** e posterior anonimização. Logs técnicos de aplicação são higienizados para exibir **0 ocorrências de PII, senhas ou tokens**.
-- **Desenvolvimento em Emuladores e Controle Orçamentário (`RNF06`, `RNF10`):** O ambiente local sobe integralmente com `docker compose up` utilizando emuladores do Firebase Auth e Firestore, mantendo o gasto na Google Cloud Platform (GCP) abaixo de **US$ 5,00** até a Semana 4 e entre **US$ 4,00 e US$ 10,00** na operação total do ciclo (respeitando o teto de **US$ 50,00** com alertas em 50%, 80% e 100%).
+- **Desenvolvimento em Emuladores e Controle Orçamentário (`RNF06`, `RNF10`):** O ambiente local sobe integralmente com `docker compose up` utilizando emuladores do Firebase Auth e Firestore, sem consumo de nuvem. Em produção o projeto segue o **Plano Custo Zero** ([ADR-011](arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md)): frontend no Firebase Hosting, Auth e Firestore no plano Spark e API no web service gratuito do Render, chamada direto pelo front com CORS restrito ao domínio da equipe. A meta é **US$ 0,00** no ciclo (o Caderno permite até US$ 50,00), e o controle passa a ser o uso das cotas gratuitas, registrado em [FinOps](finops/index.md).
 
 ---
 
