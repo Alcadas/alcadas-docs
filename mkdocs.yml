@@ -112,4 +112,6 @@ nav:
       - "Matriz de Alçadas": governanca/matriz-alcadas.md
       - "Matriz RACI": governanca/matriz-raci.md
   - Rastreabilidade: rastreabilidade.md
-  - "FinOps — Custo Zero": finops/index.md
+  - "FinOps — Custo Zero":
+      - "Visão Geral e Evidências": finops/index.md
+      - "Leituras e Escritas do Firestore": finops/cotas-firestore.md

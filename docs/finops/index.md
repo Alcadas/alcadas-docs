@@ -8,7 +8,7 @@ O Alçadas segue o **Plano Custo Zero — sem o voucher do GCP** ([ADR-011](../a
 | :--- | :--- | :--- | :--- |
 | CP1 — Fundação (18/10) | Alertas de orçamento 50/80/100 % | Print do projeto Firebase no Spark, sem conta de faturamento | ⏳ |
 | CP2 — Núcleo funcional (01/11) | Gasto ≤ US$ 5 | Gasto = US$ 0 + decisão registrada em ADR ([ADR-011](../arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md)) | ⏳ prints |
-| CP3 — Nuvem e integração (15/11) | Gasto ≤ US$ 12 | Gasto = US$ 0 | — |
+| CP3 — Nuvem e integração (15/11) | Gasto ≤ US$ 12 | Gasto = US$ 0 + [leituras e escritas do Firestore por jornada](cotas-firestore.md) | ⏳ estimativa feita, falta medir |
 | CP4 — Estabilização (29/11) | Auditoria de custo e congelamento em US$ 40 | Auditoria das cotas usadas (Firestore, Hosting, Render, Actions) | — |
 
 ---
@@ -38,11 +38,16 @@ Limites conferidos pelo laboratório em 14/10/2026; o DevOps confere de novo ant
 
 | Serviço | Limite gratuito | Ao estourar |
 | :--- | :--- | :--- |
-| Firestore | 1 GiB armazenado; 50 mil leituras, 20 mil escritas e 20 mil exclusões por dia | Para de aceitar leitura ou escrita até o dia seguinte |
+| Firestore | 1 GiB armazenado; 50 mil leituras, 20 mil escritas e 20 mil exclusões por dia | Para de aceitar leitura ou escrita até o dia seguinte. Consumo por jornada em [Leituras e Escritas do Firestore](cotas-firestore.md) |
 | Firebase Auth | 50 mil usuários ativos por mês | Novos logins recusados |
 | Firebase Hosting | 10 GB armazenados; 360 MB transferidos por dia | Site fora do ar até o dia seguinte |
 | Render (web service) | 750 horas por mês por workspace; dorme após 15 min sem uso | API suspensa até o mês seguinte |
 | UptimeRobot | 50 monitores, checagem a cada 5 min | — |
+
+---
+
+> [!WARNING] Risco aberto no CP3
+> A atualização automática da tela de Solicitações e de Aprovações (a cada 8 s) gasta cerca de **24 mil leituras por hora por aba aberta**. Com 5 pessoas por 2 horas, o Demo Day estouraria a cota diária. Ver os [ajustes propostos](cotas-firestore.md#4-ajustes-necessarios-a-abrir-como-issues-no-alcadas-core).
 
 ---
 
