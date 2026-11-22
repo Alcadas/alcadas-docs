@@ -56,14 +56,17 @@ jobs:
       - name: Validate MkDocs Build
         run: mkdocs build --strict
 
-  build-test:
-    name: Dry Run Build & Tests
+  openapi-validate:
+    name: Validar contrato OpenAPI
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Test Environment Setup
-        run: |
-          echo "Simulando ambiente de build do Alçadas..."
-          echo "Build de teste finalizado com sucesso!"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validar docs/api/openapi.yaml (estrutura e $refs)
+        run: npx --yes @apidevtools/swagger-cli@4.0.4 validate docs/api/openapi.yaml

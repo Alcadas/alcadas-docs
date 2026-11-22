@@ -1,12 +1,22 @@
 openapi: 3.0.3
 info:
-  title: API Alçadas - Checkpoint 1
+  title: API Alçadas - Checkpoint 2
   description: >-
-    Especificação formal da API REST do sistema Alçadas para o Checkpoint 1.
-    Cobre as cinco jornadas do MVP: criação de solicitações, decisão de aprovação,
-    bloqueio/rejeição com justificativa, trilha de auditoria criptográfica e
-    verificação de integridade da cadeia de hashes SHA-256.
-  version: 0.1.0
+    Contrato da API REST do sistema Alçadas no Checkpoint 2 (núcleo funcional local).
+    Cobre as jornadas 1 a 3 e 5 do MVP: configuração de centros de custo e tetos de alçada,
+    submissão de solicitações, decisão do aprovador (aprovar, rejeitar, pedir ajuste) e
+    trilha de auditoria com verificação da cadeia SHA-256.
+
+
+    Todas as rotas usam o prefixo `/api` e exigem `Authorization: Bearer <token do Firebase Auth>`,
+    exceto `/healthz` e `/readyz`. O tenant e o papel do usuário vêm do token, nunca da URL ou do corpo.
+
+
+    A extensão `x-implementado` indica a situação de cada operação no código (`alcadas-core`):
+    `true` = já está na branch `develop`; `em-revisao` = implementada em PR aberto;
+    `false` = prevista para um checkpoint futuro. Histórico de versões em
+    `docs/api/index.md` e decisões em ADR-008 e ADR-009.
+  version: 0.2.0
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
@@ -15,10 +25,18 @@ info:
     url: https://github.com/Alcadas/alcadas-docs
 
 servers:
-  - url: https://api.alcadas.unb.br/v1
-    description: Servidor Principal
-  - url: http://127.0.0.1:3000/api
-    description: Servidor de Desenvolvimento Local (Emuladores Firebase)
+  - url: http://localhost:3000/api
+    description: Desenvolvimento local (docker compose + emuladores Firebase). A API publicada fica no Render (Checkpoint 3) e é chamada direto pelo frontend no Firebase Hosting, com CORS restrito ao domínio da equipe (ADR-011).
+
+tags:
+  - name: Saúde
+    description: Liveness e readiness (rotas públicas).
+  - name: Configuração
+    description: Jornada 1 — centros de custo e tetos de alçada (RF01 / US-01).
+  - name: Solicitações
+    description: Jornadas 2 e 3 — submissão e decisão (RF02, RF03, RF11 / US-02 a US-05).
+  - name: Trilha
+    description: Jornada 5 — trilha de auditoria SHA-256 (RF07 a RF09 / US-07, US-08, US-13).
 
 components:
   securitySchemes:
@@ -69,6 +87,16 @@ components:
         error:
           type: string
           example: Forbidden
+          description: >-
+            Nome do erro HTTP ou código de domínio. Códigos usados pela máquina de estados:
+            `TRANSICAO_INVALIDA` (ação não permitida no estado atual ou estado terminal) e
+            `CONFLITO_VERSAO` (versão desatualizada ou decisão concorrente).
+        campos:
+          type: array
+          items:
+            type: string
+          example: [valor]
+          description: Campos que falharam na validação (somente em respostas 400).
         timestamp:
           type: string
           format: date-time
@@ -153,6 +181,24 @@ components:
           type: string
           nullable: true
           example: Suspeita de duplicidade detectada em intervalo inferior a 7 dias.
+        fornecedor:
+          type: string
+          nullable: true
+          example: Softwares SA
+        aprovadorId:
+          type: string
+          description: Quem registrou a última decisão (aprovar, rejeitar ou pedir ajuste).
+          example: usr-aprov-02
+        decididoPorId:
+          type: string
+          example: usr-aprov-02
+        motivoDecisao:
+          type: string
+          description: Motivo informado na rejeição ou no pedido de ajuste.
+          example: Fora do orçamento do trimestre
+        observacaoDecisao:
+          type: string
+          description: Observação opcional informada na aprovação.
         createdAt:
           type: string
           format: date-time
@@ -234,13 +280,160 @@ components:
         authorId:
           type: string
           example: usr-aprov-02
+        authorRole:
+          type: string
+          example: APROVADOR_N2
+          description: Papel do autor no momento do evento (informativo; não entra no hash).
         timestampUtc:
           type: string
           format: date-time
           example: '2026-10-20T18:15:30.000Z'
         payload:
           type: object
-          description: Carga de dados determinística serializada.
+          additionalProperties: true
+          description: >-
+            Dados da ação. Nas transições inclui `transicao` (T01–T06), `de`, `para` e `versao`.
+            Entra no hash serializado em JSON canônico (chaves ordenadas).
+
+    UserRole:
+      type: string
+      enum: [SOLICITANTE, APROVADOR_N1, APROVADOR_N2, DIRETOR_CFO, USER_NORMAL, SUPER_USER, AUDITOR, ADMIN]
+      description: Papéis do token (custom claim `role`). Ver ADR-007.
+      example: APROVADOR_N2
+
+    NivelAlcada:
+      type: string
+      enum: [N1, N2, N3]
+      example: N2
+
+    CentroCusto:
+      type: object
+      required: [id, codigo, nome, ativo, createdAt, updatedAt]
+      properties:
+        id:
+          type: string
+          example: cc-clinica-centro
+        codigo:
+          type: string
+          example: CC-CENTRO
+        nome:
+          type: string
+          example: Clínica Centro
+        orcamentoMensal:
+          type: number
+          format: double
+          minimum: 0
+          example: 50000.00
+        ativo:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CriarCentroCustoDto:
+      type: object
+      required: [codigo, nome]
+      properties:
+        codigo:
+          type: string
+          minLength: 1
+          example: CC-CENTRO
+        nome:
+          type: string
+          minLength: 1
+          example: Clínica Centro
+        orcamentoMensal:
+          type: number
+          format: double
+          minimum: 0
+          example: 50000.00
+        ativo:
+          type: boolean
+          default: true
+
+    TetoAlcada:
+      type: object
+      required: [id, nivel, cargo, valorMinimo, teto, semLimite, aprovacoesNecessarias, updatedAt]
+      properties:
+        id:
+          type: string
+          example: tier-cc-clinica-centro-N2
+        centroCustoId:
+          type: string
+          nullable: true
+          description: Centro de custo ao qual o teto se aplica; `null` = padrão do tenant.
+          example: cc-clinica-centro
+        nivel:
+          $ref: '#/components/schemas/NivelAlcada'
+        cargo:
+          $ref: '#/components/schemas/UserRole'
+        valorMinimo:
+          type: number
+          format: double
+          example: 1000.01
+        teto:
+          type: number
+          format: double
+          nullable: true
+          description: Valor máximo que o nível pode decidir; `null` quando `semLimite` é verdadeiro.
+          example: 5000.00
+        semLimite:
+          type: boolean
+          example: false
+        aprovacoesNecessarias:
+          type: integer
+          minimum: 1
+          example: 1
+        updatedAt:
+          type: string
+          format: date-time
+
+    ConfigurarTetosDto:
+      type: object
+      description: >-
+        Matriz de alçadas de um centro de custo (ou do tenant, sem `centroCustoId`).
+        Teto vazio, zero ou negativo é recusado com 400 e nada é gravado (CA-01.1).
+        `N3: null` significa sem limite.
+      required: [N1, N2, N3]
+      properties:
+        centroCustoId:
+          type: string
+          nullable: true
+          example: cc-clinica-centro
+        N1:
+          type: number
+          format: double
+          exclusiveMinimum: true
+          minimum: 0
+          example: 1000.00
+        N2:
+          type: number
+          format: double
+          exclusiveMinimum: true
+          minimum: 0
+          example: 5000.00
+        N3:
+          type: number
+          format: double
+          nullable: true
+          exclusiveMinimum: true
+          minimum: 0
+          example: null
+
+    Saude:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        firestore:
+          type: string
+          enum: [ok]
 
     VerificacaoTrilhaResponseDto:
       type: object
@@ -249,6 +442,8 @@ components:
         - totalElos
         - tempoProcessamentoMs
         - eloInconsistente
+        - motivo
+        - mensagem
       properties:
         status:
           type: string
@@ -266,6 +461,15 @@ components:
           nullable: true
           example: null
           description: Sequência do primeiro elo divergente encontrado, se houver.
+        motivo:
+          type: string
+          nullable: true
+          enum: [SEQUENCIA_QUEBRADA, ENCADEAMENTO_QUEBRADO, HASH_DIVERGENTE, null]
+          example: null
+          description: >-
+            Por que o elo falhou: `SEQUENCIA_QUEBRADA` (elo removido/inserido),
+            `ENCADEAMENTO_QUEBRADO` (hashAnterior não bate com o elo anterior) ou
+            `HASH_DIVERGENTE` (dados do elo alterados).
         mensagem:
           type: string
           example: Todos os selos criptográficos SHA-256 coincidem deterministicamente.
@@ -274,11 +478,193 @@ security:
   - bearerAuth: []
 
 paths:
+  /healthz:
+    get:
+      summary: Liveness
+      description: Indica que o processo da API está de pé. Não consulta o banco. É o health check do Render (ADR-011).
+      operationId: healthz
+      tags: [Saúde]
+      x-implementado: em-revisao
+      security: []
+      responses:
+        '200':
+          description: API no ar.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Saude'
+
+  /readyz:
+    get:
+      summary: Readiness
+      description: Indica que a API consegue falar com o Firestore. Monitorado pelo UptimeRobot no ambiente publicado (ADR-011).
+      operationId: readyz
+      tags: [Saúde]
+      x-implementado: em-revisao
+      security: []
+      responses:
+        '200':
+          description: Pronta para receber tráfego.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Saude'
+        '503':
+          description: Firestore indisponível.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /centros-custo:
+    post:
+      summary: Cadastrar centro de custo
+      description: Cria um centro de custo no tenant do usuário. Somente ADMIN (US-01).
+      operationId: criarCentroCusto
+      tags: [Configuração]
+      x-implementado: em-revisao
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CriarCentroCustoDto'
+      responses:
+        '201':
+          description: Centro de custo criado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CentroCusto'
+        '400':
+          description: Código ou nome ausente, ou orçamento negativo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Papel diferente de ADMIN.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Já existe centro de custo com o mesmo código no tenant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: Listar centros de custo
+      description: Lista os centros de custo do tenant do usuário.
+      operationId: listarCentrosCusto
+      tags: [Configuração]
+      x-implementado: em-revisao
+      responses:
+        '200':
+          description: Centros de custo do tenant.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CentroCusto'
+        '401':
+          description: Não autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /alcadas/tetos:
+    put:
+      summary: Configurar tetos de alçada (N1, N2, N3)
+      description: >-
+        Grava a matriz de alçadas do centro de custo informado (ou o padrão do tenant). Somente ADMIN.
+        Exemplo da Startop: N1 = 1000.00, N2 = 5000.00, N3 = null (sem limite).
+      operationId: configurarTetos
+      tags: [Configuração]
+      x-implementado: em-revisao
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigurarTetosDto'
+      responses:
+        '200':
+          description: Tetos gravados (um registro por nível).
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TetoAlcada'
+        '400':
+          description: Teto vazio, zero, negativo ou fora de ordem (N1 < N2 < N3) — nada é gravado (CA-01.1).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Não autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Papel diferente de ADMIN.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Centro de custo inexistente no tenant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: Consultar tetos de alçada
+      description: Retorna os tetos do centro de custo (ou o padrão do tenant quando não houver específico).
+      operationId: consultarTetos
+      tags: [Configuração]
+      x-implementado: em-revisao
+      parameters:
+        - name: centroCustoId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tetos vigentes.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TetoAlcada'
+        '401':
+          description: Não autenticado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /solicitacoes:
     post:
       summary: Criar solicitação financeira
       description: Submete um novo pedido de compra, pagamento ou reembolso, gerando o elo Log 1 na trilha.
       operationId: criarSolicitacao
+      tags: [Solicitações]
+      x-implementado: em-revisao
       requestBody:
         required: true
         content:
@@ -313,8 +699,12 @@ paths:
 
     get:
       summary: Listar solicitações
-      description: Retorna lista paginada de solicitações pertencentes estritamente ao tenant do usuário autenticado.
+      description: >-
+        Retorna uma página de solicitações do tenant do usuário, da mais recente para a mais antiga.
+        `GET /solicitacoes?page=2&limit=20` devolve os itens 21 a 40.
       operationId: listarSolicitacoes
+      tags: [Solicitações]
+      x-implementado: em-revisao
       parameters:
         - name: status
           in: query
@@ -328,12 +718,16 @@ paths:
           schema:
             type: integer
             default: 1
+            minimum: 1
         - name: limit
           in: query
           required: false
           schema:
             type: integer
             default: 20
+            minimum: 1
+            maximum: 50
+          description: Itens por página (máximo 50). Toda consulta filtra por tenant e usa limit (FinOps).
       responses:
         '200':
           description: Lista recuperada com sucesso.
@@ -343,6 +737,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/SolicitacaoResponseDto'
+        '400':
+          description: Parâmetro de paginação ou filtro de status inválido.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           description: Não autenticado.
           content:
@@ -355,6 +755,8 @@ paths:
       summary: Consultar detalhes da solicitação
       description: Retorna os dados completos da solicitação. Aplica isolamento de tenant rigoroso (retorna 403 ou 404 em acessos cruzados).
       operationId: obterSolicitacaoPorId
+      tags: [Solicitações]
+      x-implementado: false
       parameters:
         - name: id
           in: path
@@ -393,6 +795,8 @@ paths:
       summary: Aprovar solicitação financeira
       description: Registra parecer favorável de aprovador competente, avança para APROVADA e grava o elo Log 2 na trilha.
       operationId: aprovarSolicitacao
+      tags: [Solicitações]
+      x-implementado: true
       parameters:
         - name: id
           in: path
@@ -425,13 +829,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Bloqueio de SoD (solicitante tentando aprovar) ou valor acima da alçada.
+          description: >-
+            Papel sem competência de decisão (US-09), valor acima do teto do aprovador (CA-03.1)
+            ou quebra de SoD — autor tentando decidir o próprio pedido, registrado como BLOQUEIO_SOD (CA-04.1).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Solicitação inexistente no tenant do usuário (inclui pedido de outra empresa — CA-16.1).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
-          description: Decisão concorrente (conflito de versão) ou solicitação já em estado terminal.
+          description: >-
+            `CONFLITO_VERSAO` — versão ausente, desatualizada ou outra decisão gravada antes (CA-05.1);
+            `TRANSICAO_INVALIDA` — solicitação já está em APROVADA, REJEITADA ou EM_AJUSTE (CA-03.4).
           content:
             application/json:
               schema:
@@ -442,6 +856,8 @@ paths:
       summary: Rejeitar solicitação financeira
       description: Reprova formalmente o pedido com justificativa de no mínimo 10 caracteres, avança para REJEITADA e grava o elo Log 3.
       operationId: rejeitarSolicitacao
+      tags: [Solicitações]
+      x-implementado: true
       parameters:
         - name: id
           in: path
@@ -474,13 +890,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Não autorizado a decidir esta solicitação.
+          description: Papel sem competência, valor acima do teto ou quebra de SoD.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Solicitação inexistente no tenant do usuário.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '409':
-          description: Conflito concorrente ou solicitação já encerrada.
+          description: '`CONFLITO_VERSAO` ou `TRANSICAO_INVALIDA` (ver /aprovar).'
           content:
             application/json:
               schema:
@@ -491,6 +913,8 @@ paths:
       summary: Solicitar ajuste na solicitação
       description: Devolve o pedido para correção pelo solicitante com orientações formais (mínimo 10 caracteres), avança para EM_AJUSTE e grava o elo Log 4.
       operationId: solicitarAjuste
+      tags: [Solicitações]
+      x-implementado: true
       parameters:
         - name: id
           in: path
@@ -522,8 +946,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Papel sem competência, valor acima do teto ou quebra de SoD.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Solicitação inexistente no tenant do usuário.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '409':
-          description: Conflito de concorrência ou estado inválido.
+          description: '`CONFLITO_VERSAO` ou `TRANSICAO_INVALIDA` (ver /aprovar).'
           content:
             application/json:
               schema:
@@ -532,8 +968,12 @@ paths:
   /solicitacoes/{id}/trilha:
     get:
       summary: Consultar trilha de auditoria criptográfica
-      description: Retorna a sequência ordenada de elos e hashes SHA-256 encadeados do ciclo de vida da solicitação. Rota imutável (sem PUT/DELETE).
+      description: >-
+        Retorna os elos da trilha ordenados por sequência. Aprovadores, AUDITOR e ADMIN leem qualquer
+        solicitação do tenant; SOLICITANTE só a do próprio pedido. Não existe rota de alteração ou exclusão de elos.
       operationId: obterTrilhaAuditoria
+      tags: [Trilha]
+      x-implementado: em-revisao
       parameters:
         - name: id
           in: path
@@ -556,7 +996,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '403':
-          description: Acesso proibido ao tenant.
+          description: Solicitante consultando a trilha de pedido de outra pessoa.
           content:
             application/json:
               schema:
@@ -571,8 +1011,12 @@ paths:
   /solicitacoes/{id}/trilha/verificar:
     post:
       summary: Verificar integridade criptográfica da trilha
-      description: Executa o algoritmo determinístico de recálculo dos hashes SHA-256 elo a elo, validando se houve adulteração no banco de dados (< 1 s).
+      description: >-
+        Recalcula os hashes SHA-256 elo a elo e aponta o primeiro registro quebrado (CA-08.2).
+        Para cadeias de até 1.000 elos deve responder em menos de 1 s. Mesmas regras de acesso de GET /trilha.
       operationId: verificarIntegridadeTrilha
+      tags: [Trilha]
+      x-implementado: em-revisao
       parameters:
         - name: id
           in: path
@@ -608,8 +1052,10 @@ paths:
   /solicitacoes/{id}/trilha/exportar:
     get:
       summary: Exportar relatório de auditoria
-      description: Exporta os elos completos e selos digitais em formato CSV ou JSON para validação externa independente (RF09 / US-13).
+      description: Exporta os elos completos e selos digitais em formato CSV ou JSON para validação externa independente (RF09 / US-13). Previsto para o Checkpoint 3.
       operationId: exportarTrilha
+      tags: [Trilha]
+      x-implementado: false
       parameters:
         - name: id
           in: path

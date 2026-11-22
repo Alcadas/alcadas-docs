@@ -1,7 +1,7 @@
 # ADR-007: Controle de Acesso Baseado em Papéis (RBAC) e Segregação de Funções (SoD)
 
 ## Status
-**Aceito** (Checkpoint 1)
+**Aceito** (Checkpoint 1) — a seção "Camada 2: Cloud Firestore (Security Rules)" foi **substituída pelo [ADR-008](ADR-008-firestore-deny-all.md)** no Checkpoint 2.
 
 ## Data
 2026-10-18

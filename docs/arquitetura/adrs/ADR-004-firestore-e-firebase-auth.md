@@ -1,7 +1,7 @@
 # ADR-004: Persistência com Cloud Firestore e Autenticação com Firebase Auth
 
 ## Status
-**Aceito** (Checkpoint 1)
+**Aceito** (Checkpoint 1) — continua válido no Plano Custo Zero: Firestore e Firebase Auth seguem no plano **Spark** ([ADR-011](ADR-011-hospedagem-render-firebase-spark.md)); as menções a orçamento no GCP foram substituídas pela meta de US$ 0.
 
 ## Data
 2026-10-18

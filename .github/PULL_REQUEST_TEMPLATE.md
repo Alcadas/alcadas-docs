@@ -23,12 +23,16 @@ Descreva de forma concisa e clara o que foi implementado, alterado ou corrigido.
 
 ---
 
-## 🎯 Checklist de Qualidade — Definition of Done (DoD)
-> Conforme estabelecido na [Definition of Done](docs/governanca/dod.md) (Caderno B2B v2, Seção 1.6):
+## ✅ Definition of Done
+> Conforme a [Definition of Done](https://github.com/Alcadas/alcadas-docs/blob/main/docs/governanca/dod.md) (Caderno B2B v2, seção 1.6). Item que não se aplica fica com `N/A`.
 
-- [ ] **1. Código Funcional e Testes:** O código foi testado localmente e os testes unitários/integração passaram sem erros?
-- [ ] **2. Critérios de Aceite e Cobertura:** Todos os Critérios de Aceite (CAs) da User Story correspondente foram validados?
-- [ ] **3. Build e CI Verde:** O comando `npm run build` (ou `mkdocs build --strict`) executou sem erros e o pipeline do CI está verde?
-- [ ] **4. Padrões de Código e Linter:** Executou o linter e o código está em conformidade com o `.editorconfig` e sem PII/segredos em logs?
-- [ ] **5. Documentação Atualizada:** A documentação correspondente (OpenAPI, ADRs, arquitetura ou guias) foi atualizada?
-- [ ] **6. Revisão por Pares (Peer Review):** O PR segue o padrão semântico de branch/commit e está pronto para revisão por pelo menos um par?
+**Autor**
+- [ ] Branch no padrão `docs/#<issue>-descricao` e commits no padrão Conventional Commits.
+- [ ] `mkdocs build --strict` passou localmente e o CI está verde.
+- [ ] Mudança em rota da API está igual no `docs/api/openapi.yaml`, com versão e histórico atualizados.
+- [ ] Decisão técnica nova ou que contraria uma anterior tem ADR em `docs/arquitetura/adrs/`.
+- [ ] Rastreabilidade atualizada quando muda requisito, critério de aceite, rota ou teste.
+- [ ] Nenhum dado pessoal (nome, CPF, telefone de entrevistado) nem segredo no texto ou nas imagens.
+
+**Revisor** (pessoa diferente do autor)
+- [ ] Li o conteúdo renderizado (não só o diff) e os links funcionam.

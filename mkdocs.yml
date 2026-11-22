@@ -10,6 +10,7 @@ site_dir: site
 
 theme:
   name: material
+  custom_dir: overrides
   language: pt-BR
   palette:
     - scheme: default
@@ -61,6 +62,8 @@ extra_css:
 extra_javascript:
   - javascripts/mathjax.js
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
+  - javascripts/panzoom.min.js
+  - javascripts/panzoom-init.js
 
 plugins:
   - search
@@ -69,14 +72,22 @@ plugins:
 
 nav:
   - Início: index.md
-  - "Visão do Produto": 
-        - "Cenário atual e Solução proposta" : visao-produto/visao-produto.md
-        - "Personas do Usuário" : visao-produto/personas.md
-        - "Cronograma da Equipe" : visao-produto/cronograma.md
-  - Requisitos: requisitos.md
-  - "Histórias de Usuários": historias-usuario.md
+  - "Visão do Produto":
+      - "Cenário atual e Solução proposta": visao-produto/visao-produto.md
+      - "Personas do Usuário": visao-produto/personas.md
+      - "Cronograma da Equipe": visao-produto/cronograma.md
+      - "Processos de Negócio (BPMN)":
+          - "Processo Atual (As-Is)": processos/bpmn-as-is.md
+          - "Processo Proposto (To-Be)": processos/bpmn-to-be.md
+  - "Requisitos":
+      - "Requisitos do Sistema": requisitos.md
+      - "Histórias de Usuários": historias-usuario.md
   - Arquitetura:
       - "Visão Geral": ARCHITECTURE.md
+      - "Diagramas de Sequência": arquitetura/diagramas-sequencia.md
+      - "Modelo C4": arquitetura/c4-model.md
+      - "Modelo de Dados & Classes": arquitetura/modelo-dados.md
+      - "Modelagem de Ameaças (STRIDE)": arquitetura/ameacas-stride.md
       - "Tabela de Transições": arquitetura/tabela-transicoes.md
       - "Decisões de Arquitetura (ADRs)":
           - "Catálogo de ADRs": arquitetura/adrs/index.md
@@ -87,11 +98,20 @@ nav:
           - "ADR-005: Máquina de Estados": arquitetura/adrs/ADR-005-maquina-de-estados.md
           - "ADR-006: Cadeia de Hash SHA-256": arquitetura/adrs/ADR-006-cadeia-de-hash.md
           - "ADR-007: RBAC e Segregação de Funções": arquitetura/adrs/ADR-007-rbac-e-sod.md
+          - "ADR-008: Firestore deny-all": arquitetura/adrs/ADR-008-firestore-deny-all.md
+          - "ADR-009: Contrato da API v0.2": arquitetura/adrs/ADR-009-contrato-api-v0-2.md
+          - "ADR-010: Concorrência otimista (CP2)": arquitetura/adrs/ADR-010-concorrencia-otimista-rest.md
+          - "ADR-011: Plano Custo Zero (Render + Spark)": arquitetura/adrs/ADR-011-hospedagem-render-firebase-spark.md
   - "API (OpenAPI)":
-      - "Especificação OpenAPI v0.1": api/index.md
+      - "Especificação OpenAPI v0.2": api/index.md
   - "Testes e QA":
       - "Estratégia de Testes": testes/estrategia_de_testes.md
   - Governança:
       - "Definition of Done (DoD)": governanca/dod.md
-  - Sprints: 
-    - "Sprint 1": sprints/relatorio-sprint-1.md
+      - "Regras do Repositório": governanca/regras-repositorio.md
+      - "Matriz de Alçadas": governanca/matriz-alcadas.md
+      - "Matriz RACI": governanca/matriz-raci.md
+  - Rastreabilidade: rastreabilidade.md
+  - "FinOps — Custo Zero": finops/index.md
+  - Sprints:
+      - "Sprint 1": sprints/relatorio-sprint-1.md
