@@ -63,6 +63,8 @@ A stack está definida na Visão do Produto: Angular (frontend), NestJS (backend
 | Execução automática | GitHub Actions |
 | Relatórios | JUnit e cobertura gerados no CI, em `/docs/testes` |
 
+Os resultados de cada execução ficam nos relatórios de testes. O primeiro é o [Relatório de Testes v1](relatorio-v1.md), do Checkpoint 2.
+
 ## 5. Matriz de rastreabilidade
 
 A matriz liga cada requisito ao seu critério de aceite, ao teste que o verifica e ao resultado:
