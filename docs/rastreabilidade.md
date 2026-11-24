@@ -24,7 +24,7 @@ flowchart LR
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | Ausência de limites claros de aprovação por cargo | Jornada 1: Configuração | **RF01** | **RN01** (Tetos por nível) | **US-01** (Configurar Alçadas) | `POST /api/centros-custo`<br>`PUT /api/alcadas/tetos` | CT-01, CT-08, CT-09 |
 | Pedidos soltos em mensagens de WhatsApp | Jornada 2: Submissão | **RF02** | **RN02** (Justificativa obrigatória) | **US-02** (Submeter Pedido) | `POST /api/solicitacoes` | CT-02, CT-03, CT-10, CT-11 |
-| Decisão sem autoridade formal | Jornada 3: Decisão | **RF03** | **RN01** (Tetos por nível) | **US-03** (Decidir dentro da alçada) | `POST /api/solicitacoes/{id}/aprovar`<br>`POST /api/solicitacoes/{id}/rejeitar`<br>`POST /api/solicitacoes/{id}/ajuste` | CT-04, CT-06, CT-12, CT-13 |
+| Fluxos de aprovação verbais, sem padronização | Jornada 3: Decisão | **RF03** | **RN01** (Tetos por nível) | **US-03** (Decidir dentro da alçada) | `POST /api/solicitacoes/{id}/aprovar`<br>`POST /api/solicitacoes/{id}/rejeitar`<br>`POST /api/solicitacoes/{id}/ajuste` | CT-04, CT-06, CT-12, CT-13 |
 | Autoaprovação indevida de despesas pessoais | Jornada 3: Decisão & SoD | **RF12** | **RN03** (Bloqueio SoD)<br>**RN12** (SoD em delegação) | **US-04** (SoD) | `POST /api/solicitacoes/{id}/aprovar` | CT-14, CT-15 |
 | Decisões concorrentes gerando duplicidade | Desafio de Engenharia | **RF11** | **RN11** (Transação Atômica) | **US-05** (Concorrência Otimista) | `POST /api/solicitacoes/{id}/aprovar` | CT-07 |
 | Gargalo por ausência/férias de diretores | Jornada 3: Delegação | **RF04** | **RN04** (Vigência com timer) | **US-10** (Delegação Temporária) | `POST /api/delegacoes`<br>`GET /api/delegacoes/ativas` *(fora do contrato v0.2 — Should)* | CT-16 a CT-19 *(não executados)* |
@@ -43,7 +43,7 @@ flowchart LR
 
 Cada linha liga **requisito → critério de aceite → caso de teste (CT-xx) → resultado**. Os critérios vêm das [Histórias de Usuário](historias-usuario.md).
 
-**Execução:** local, em 18/11/2026, com os emuladores do Firebase (`demo-alcadas`), nas branches dos PRs de teste do `alcadas-core` ([#93](https://github.com/Alcadas/alcadas-core/pull/93), [#94](https://github.com/Alcadas/alcadas-core/pull/94), [#95](https://github.com/Alcadas/alcadas-core/pull/95) e [#98](https://github.com/Alcadas/alcadas-core/pull/98)).
+**Execução:** local, em 24/11/2026, com os emuladores do Firebase (`demo-alcadas`), na `main` do `alcadas-core` (commit `0928e68`), que já inclui os PRs de teste [#93](https://github.com/Alcadas/alcadas-core/pull/93), [#94](https://github.com/Alcadas/alcadas-core/pull/94), [#95](https://github.com/Alcadas/alcadas-core/pull/95) e [#98](https://github.com/Alcadas/alcadas-core/pull/98). Os números completos estão no [Relatório de Testes v1](testes/relatorio-v1.md). A execução anterior, de 18/11, tinha 4 critérios falhando; os bugs encontrados nela foram corrigidos (ver 3.7).
 
 **Legenda:** ✅ Passou · ❌ Falhou · 🟡 Parcial · ⏳ Não executado
 
@@ -52,16 +52,16 @@ Cada linha liga **requisito → critério de aceite → caso de teste (CT-xx) �
 | Requisito | Critério de aceite | Caso de teste | Resultado |
 |---|---|---|---|
 | RF01 | **CA-01.1** — teto vazio, 0 ou negativo é recusado; nenhuma faixa inválida gravada | CT-08 | ✅ Passou |
-| RF01 | **CA-01.2** — com teto do Gerente = R$ 5.000,00, pedido de R$ 5.000,01 não pode ser decidido pelo Gerente (`403`) e fica disponível ao nível superior | CT-01 | ❌ Falhou → divergência em análise com Tech Lead/PO¹ |
-| RF01 | **CA-01.3** — centro de custo recém-criado aparece no formulário de solicitação em até 1,5 s, sem recarregar | CT-09 | ❌ Falhou → [BUG-004](https://github.com/Alcadas/alcadas-core/issues/97) |
+| RF01 | **CA-01.2** — com teto do Gerente = R$ 5.000,00, pedido de R$ 5.000,01 não pode ser decidido pelo Gerente (`403`) e fica disponível ao nível superior | CT-01 | ❌ Falhou → [BUG-005](https://github.com/Alcadas/alcadas-core/issues/107)¹ |
+| RF01 | **CA-01.3** — centro de custo recém-criado aparece no formulário de solicitação em até 1,5 s, sem recarregar | CT-09 | ✅ Passou ([BUG-004](https://github.com/Alcadas/alcadas-core/issues/97) corrigido) |
 
 ### 3.2. Jornada 2 — Submissão (US-02)
 
 | Requisito | Critério de aceite | Caso de teste | Resultado |
 |---|---|---|---|
-| RF02 | **CA-02.1** — sem um dos 4 campos obrigatórios o envio é bloqueado, nada é criado e o campo é indicado | CT-10 | ❌ Falhou → [BUG-003](https://github.com/Alcadas/alcadas-core/issues/96) |
+| RF02 | **CA-02.1** — sem um dos 4 campos obrigatórios o envio é bloqueado, nada é criado e o campo é indicado | CT-10 | ✅ Passou ([BUG-003](https://github.com/Alcadas/alcadas-core/issues/96) corrigido) |
 | RF02 | **CA-02.2** — acima da base da categoria, justificativa com 29 caracteres é recusada e com 30 é aceita | CT-03 | ✅ Passou |
-| RF02 | **CA-02.3** — valor ≤ 0 ou com mais de 2 casas decimais é recusado | CT-02 | ❌ Falhou → [BUG-001](https://github.com/Alcadas/alcadas-core/issues/86) |
+| RF02 | **CA-02.3** — valor ≤ 0 ou com mais de 2 casas decimais é recusado | CT-02 | ✅ Passou ([BUG-001](https://github.com/Alcadas/alcadas-core/issues/86) corrigido) |
 | RF02 | **CA-02.4** — após envio válido, a solicitação fica `PENDENTE` e aparece na lista em até 1,5 s | CT-11 | ✅ Passou |
 
 ### 3.3. Jornada 3 — Decisão, SoD e concorrência (US-03, US-04, US-05)
@@ -94,7 +94,7 @@ Histórias ainda não implementadas no `alcadas-core`; os casos de teste estão 
 | RF10 | **CA-12.3** — só o autor original edita; outro usuário recebe `403` | CT-22 | ⏳ Não executado |
 | RF10 | **CA-12.4** — anexos até 5 MB cada e 3 por pedido; acima disso, recusado | CT-23 | ⏳ Não executado |
 
-¹ **CT-01:** os pedidos de R$ 4.999,99 e R$ 5.000,00 são aprovados pelo Gerente, como esperado. No de R$ 5.000,01, a API responde `200`, mantém o pedido `PENDENTE` e o encaminha ao Diretor (fluxo de 3 etapas), em vez de responder `403`. O pedido não é aprovado pelo Gerente, mas o código de resposta difere do critério. Aguardando decisão do Tech Lead/PO sobre qual comportamento vale; nenhum bug aberto até lá.
+¹ **CT-01:** os pedidos de R$ 4.999,99 e R$ 5.000,00 são aprovados pelo Gerente, como esperado. O pedido de R$ 5.000,01 segue uma esteira de 3 etapas: o Gerente aprova a etapa dele (`200`), o pedido vai ao Diretor e, se o Gerente tentar aprovar também a etapa do Diretor, recebe `403`. Na execução de 18/11, o teste esperava `403` já na primeira aprovação e falhava. No commit `076457c` ele passou a verificar o `403` só na etapa do Diretor, e por isso passa. **O PO confirmou que o Gerente deve receber `403` já na primeira tentativa**, então o CA-01.2 não é atendido e foi aberto o BUG-005. O CT-01 deve voltar a esperar `403` na primeira aprovação.
 
 ### 3.5. Onde está cada caso de teste
 
@@ -114,17 +114,20 @@ Além dos critérios por jornada, três suítes verificam regras que valem para 
 | Suíte | O que verifica | Requisito / critério | Resultado |
 |---|---|---|---|
 | Autorização (`apps/api-e2e/src/api/autorizacao.spec.ts`, [#94](https://github.com/Alcadas/alcadas-core/pull/94)) | Sem token, token inválido ou expirado → `401`; papel errado → `403`; outro tenant → `403/404`; outra área → `403` | RNF03 · CA-09.1, CA-09.2, CA-09.3 | ✅ 68 de 68 |
-| Isolamento de tenant (`apps/api-e2e/src/api/tenant-isolation.spec.ts`, [#94](https://github.com/Alcadas/alcadas-core/pull/94)) | Usuário da empresa A não lê nem lista dados da empresa B | RNF07 · CA-16.1, CA-16.2 | ❌ Falhou → [BUG-002](https://github.com/Alcadas/alcadas-core/issues/92) (`GET /solicitacoes/{id}` não existe) |
-| Contrato OpenAPI (`apps/api-e2e/src/contrato/contrato-openapi.spec.ts`, [#93](https://github.com/Alcadas/alcadas-core/pull/93)) | Respostas da API batem com o contrato | Contrato v0.1 | ❌ 17 de 20 → [BUG-001](https://github.com/Alcadas/alcadas-core/issues/86), [BUG-002](https://github.com/Alcadas/alcadas-core/issues/92) e `403` de `/ajuste` ausente no contrato (comunicado ao Tech Lead) |
+| Isolamento de tenant (`apps/api-e2e/src/api/tenant-isolation.spec.ts`, [#94](https://github.com/Alcadas/alcadas-core/pull/94)) | Usuário da empresa A não lê nem lista dados da empresa B | RNF07 · CA-16.1, CA-16.2 | ✅ 4 de 4 ([BUG-002](https://github.com/Alcadas/alcadas-core/issues/92) corrigido) |
+| Contrato OpenAPI (`apps/api-e2e/src/contrato/contrato-openapi.spec.ts`, [#93](https://github.com/Alcadas/alcadas-core/pull/93)) | Respostas da API batem com o contrato | Contrato v0.1 | ✅ 20 de 20 (+2 `todo`: reenvio da US-11 e exportação da US-13, fora do CP2) |
 
-### 3.7. Bugs abertos
+### 3.7. Bugs do Checkpoint 2
 
-| Bug | Descrição | Critério | Severidade |
-|---|---|---|---|
-| [BUG-001](https://github.com/Alcadas/alcadas-core/issues/86) | `POST /solicitacoes` aceita valor zero, negativo e com mais de 2 casas decimais | CA-02.3 | — |
-| [BUG-002](https://github.com/Alcadas/alcadas-core/issues/92) | Rota `GET /solicitacoes/{id}` não existe na API | CA-16.1 / contrato | — |
-| [BUG-003](https://github.com/Alcadas/alcadas-core/issues/96) | API cria solicitação sem `centroCustoId`, `valor` ou `justificativa` | CA-02.1 | Alta |
-| [BUG-004](https://github.com/Alcadas/alcadas-core/issues/97) | Centro de custo novo só aparece no formulário depois de recarregar a página | CA-01.3 | Média |
+Em 24/11/2026 há 1 bug aberto ([BUG-005](https://github.com/Alcadas/alcadas-core/issues/107)). Os quatro bugs encontrados na execução de 18/11 foram corrigidos, e as issues foram fechadas em 20/11.
+
+| Bug | Descrição | Critério | Severidade | Situação |
+|---|---|---|---|---|
+| [BUG-001](https://github.com/Alcadas/alcadas-core/issues/86) | `POST /solicitacoes` aceitava valor zero, negativo e com mais de 2 casas decimais | CA-02.3 | — | Fechado (`076457c`) |
+| [BUG-002](https://github.com/Alcadas/alcadas-core/issues/92) | Rota `GET /solicitacoes/{id}` não existia na API | CA-16.1 / contrato | — | Fechado (`ee104dd`) |
+| [BUG-003](https://github.com/Alcadas/alcadas-core/issues/96) | API criava solicitação sem `centroCustoId`, `valor` ou `justificativa` | CA-02.1 | Alta | Fechado (`2956228`) |
+| [BUG-004](https://github.com/Alcadas/alcadas-core/issues/97) | Centro de custo novo só aparecia no formulário depois de recarregar a página | CA-01.3 | Média | Fechado (`2956228`) |
+| [BUG-005](https://github.com/Alcadas/alcadas-core/issues/107) | Gerente aprova a própria etapa de um pedido acima do teto (R$ 5.000,01) com `200`, em vez de receber `403` na primeira tentativa | CA-01.2 | — | Aberto |
 
 ---
 
