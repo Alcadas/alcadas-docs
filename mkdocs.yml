@@ -106,6 +106,7 @@ nav:
       - "Especificação OpenAPI v0.2": api/index.md
   - "Testes e QA":
       - "Estratégia de Testes": testes/estrategia_de_testes.md
+      - "Relatório de Testes v1": testes/relatorio-v1.md
   - Governança:
       - "Definition of Done (DoD)": governanca/dod.md
       - "Regras do Repositório": governanca/regras-repositorio.md
